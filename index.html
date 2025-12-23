@@ -2,6 +2,619 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Closing Count Pro</title>
+    <style>
+        :root {
+            /* Variables de Color */
+            --bg: #f0f2f5; --text: #1a1a1a; --border: #ced4da;
+            --card-bg: #ffffff; --input-bg: #f8f9fa; --sub-text: #6c757d;
+            --primary: #0d6efd; --secondary: #198754; --danger: #dc3545; --warning: #fd7e14;
+            --info: #0dcaf0; --purple: #6f42c1;
+            --total-box: #212529; --total-text: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --focus-glow: rgba(13, 110, 253, 0.15);
+        }
+
+        body.dark-mode {
+            --bg: #121212; --text: #e0e0e0; --border: #333333;
+            --card-bg: #1e1e1e; --input-bg: #2d2d2d; --sub-text: #a0a0a0;
+            --primary: #5c9ce6; --secondary: #56be82; --danger: #e6656e; --warning: #ffb05c;
+            --info: #5bcbe7; --purple: #b98ce3;
+            --total-box: #000000;
+            --shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        /* --- LAYOUT MAGISTRAL (Centrado Inteligente) --- */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg); 
+            margin: 0; 
+            min-height: 100vh;
+            display: flex; 
+            /* Esto es clave: flex-start + margin:auto en el hijo permite scroll seguro */
+            align-items: flex-start; 
+            justify-content: center;
+            padding: 20px; 
+            box-sizing: border-box;
+            color: var(--text); 
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Contenedor Principal */
+        .container { 
+            width: 100%;
+            max-width: 1100px;
+            display: grid; 
+            grid-template-columns: 1fr 360px; /* Principal | Lateral */
+            gap: 25px; 
+            position: relative;
+            margin: auto; /* Esto centra verticalmente si hay espacio, o deja hacer scroll si no */
+        }
+
+        /* --- TARJETAS Y ESTILOS --- */
+        .card { 
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow); 
+            display: flex; 
+            flex-direction: column;
+        }
+
+        /* Controles Superiores (Theme/Lang) */
+        .header-controls {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 5px;
+        }
+
+        /* Títulos */
+        .title { 
+            font-size: 0.85rem; font-weight: 700; color: var(--sub-text); 
+            text-transform: uppercase; margin-bottom: 20px; 
+            border-bottom: 2px solid var(--primary); padding-bottom: 10px; 
+            letter-spacing: 0.8px;
+        }
+
+        /* --- INPUTS PRINCIPALES (POS) --- */
+        .pos-container { display: flex; gap: 25px; }
+        .pos-column { flex: 1; }
+        .pos-column label { font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 8px; color: var(--sub-text); }
+
+        #pos-amount, .diff-result {
+            width: 100%; height: 80px; box-sizing: border-box;
+            border: 2px solid var(--border); border-radius: 10px;
+            font-size: 2rem; font-weight: 600; text-align: right;
+            background: var(--input-bg); color: var(--text);
+            padding: 0 20px; display: flex; flex-direction: column; justify-content: center;
+            transition: border-color 0.2s;
+        }
+
+        .diff-result { align-items: center; text-align: center; }
+        .diff-result span:first-child { font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; margin-bottom: 4px; }
+        .diff-result span:last-child { font-size: 1.6rem; }
+
+        .diff-result.over { background: rgba(25, 135, 84, 0.1); color: var(--secondary); border-color: var(--secondary); }
+        .diff-result.short { background: rgba(220, 53, 69, 0.1); color: var(--danger); border-color: var(--danger); }
+        .diff-result.neutral { color: var(--sub-text); }
+
+        /* --- GRID DE BILLETES Y MONEDAS --- */
+        .main-panel { display: flex; flex-direction: column; gap: 25px; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+
+        .row { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 10px 0; border-bottom: 1px solid var(--border); 
+            height: 48px; /* Altura consistente */
+        }
+        .row label { font-weight: 600; font-size: 1.1rem; flex: 1; }
+        
+        /* Inputs Generales */
+        input[type="number"] { 
+            width: 90px; padding: 10px 12px; 
+            border: 1px solid var(--border); border-radius: 8px; 
+            text-align: right; font-size: 1.1rem; font-weight: 600; 
+            background: var(--input-bg); color: var(--text);
+            transition: all 0.2s; height: 100%; box-sizing: border-box;
+            -moz-appearance: textfield; 
+        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        input:focus { 
+            outline: none; border-color: var(--primary); 
+            background-color: var(--focus-glow); 
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px var(--focus-glow);
+        }
+
+        .coin-group { display: flex; gap: 10px; align-items: center; height: 100%; }
+        
+        /* --- PANEL LATERAL --- */
+        .side-panel { display: flex; flex-direction: column; gap: 25px; }
+        
+        .summary-box { 
+            background: var(--total-box); color: var(--total-text); 
+            padding: 30px 20px; border-radius: 12px; text-align: center; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        #grand-total { font-size: 3.2rem; font-weight: 800; font-family: monospace; margin: 10px 0; letter-spacing: -1px; }
+
+        .report-list { list-style: none; padding: 0; margin: 0; }
+        .report-list li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+
+        /* --- BOTONES --- */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: auto; }
+        .btn-action { 
+            padding: 16px; cursor: pointer; background: transparent; border-radius: 8px; 
+            font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .btn-action:active { transform: scale(0.96); }
+
+        .btn-copy { border: 2px solid var(--info); color: var(--info); }
+        .btn-copy:hover { background: var(--info); color: white; }
+        
+        .btn-reset { border: 2px solid var(--danger); color: var(--danger); }
+        .btn-reset:hover { background: var(--danger); color: white; }
+
+        /* --- CHANGE BREAKER (Mejorado) --- */
+        .breaker-card { border-left: 5px solid var(--purple); }
+        
+        .change-input-group { 
+            display: flex; align-items: center; width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .change-input-group input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2rem;
+            text-align: right;
+            box-shadow: none; /* Quitamos sombra interna */
+        }
+        .change-input-group input:focus { transform: none; box-shadow: none; }
+        
+        .change-suggestion { 
+            display: flex; justify-content: space-between; 
+            padding: 12px 0; border-bottom: 1px dotted var(--border); font-weight: 600; color: var(--text);
+        }
+
+        /* --- SWITCHES & TOGGLES --- */
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        
+        .lang-btn { background: none; border: none; font-weight: bold; color: var(--sub-text); cursor: pointer; padding: 8px; border-radius: 6px; }
+        .lang-btn:hover { background: var(--input-bg); }
+        .lang-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); border-radius: 0; }
+
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 950px) {
+            .container { grid-template-columns: 1fr; gap: 25px; width: 95%; }
+            .side-panel { order: 2; }
+            .header-controls { position: sticky; top: 10px; z-index: 100; margin-bottom: 20px; }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; display: block; } 
+            .header-controls { margin-bottom: 20px; position: static; }
+            .input-grid { grid-template-columns: 1fr; gap: 20px; }
+            .row { height: auto; padding: 10px 0; }
+            input[type="number"] { width: 100px; padding: 14px; font-size: 1.3rem; }
+            .pos-container { flex-direction: column; gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="header-controls">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <label class="switch">
+                <input type="checkbox" id="mode-toggle" onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+            <span style="font-size:0.85rem; font-weight:bold; color:var(--sub-text)">Theme</span>
+        </div>
+        <div>
+            <button class="lang-btn" id="btn-es" onclick="setLang('es')">ESPAÑOL</button>
+            <button class="lang-btn" id="btn-en" onclick="setLang('en')">ENGLISH</button>
+        </div>
+    </div>
+
+    <div class="main-panel">
+        <div class="card" style="border-top: 5px solid var(--primary);">
+            <div class="title" id="t-pos-title">Sales Balance</div>
+            <div class="pos-container">
+                <div class="pos-column">
+                    <label id="t-pos-label">REPORTED POS SALES ($)</label>
+                    <input type="number" id="pos-amount" class="nav-input" placeholder="0.00" step="0.01" inputmode="decimal" enterkeyhint="next" onkeydown="blockInvalidChars(event, true)" oninput="secureCalculate(this, true)">
+                </div>
+                <div class="pos-column">
+                    <label id="t-diff-label">Difference</label>
+                    <div id="diff-display" class="diff-result neutral">
+                        <span id="t-diff-sub">Status</span>
+                        <span id="diff-value">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-grid">
+            <div class="card">
+                <div class="title" id="t-bills-title">Bills</div>
+                <div id="bills-area"></div>
+            </div>
+            <div class="card">
+                <div class="title" id="t-coins-title">Coins & Rolls</div>
+                <div id="coins-area"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="side-panel">
+        <div class="summary-box">
+            <div style="font-size: 0.85rem; opacity: 0.8; letter-spacing: 2px; font-weight: 600;" id="t-real-cash">TOTAL IN TILL</div>
+            <div id="grand-total">$0.00</div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; margin-top: 15px;">
+                <span style="font-size: 1rem; font-weight: bold;" id="t-fondo-fijo">FLOAT:</span>
+                <input type="number" id="target-safe" class="nav-input" value="250" style="width:110px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); font-size: 1.4rem;" inputmode="decimal" onkeydown="blockInvalidChars(event, true)" oninput="secureCalculate(this, true)">
+            </div>
+        </div>
+
+        <div class="card breaker-card">
+            <div class="title" style="color:var(--purple); margin-bottom: 10px;" id="t-breaker-title">Change Breaker</div>
+            <div class="change-input-group">
+                <span style="opacity: 0.5; padding-left: 10px;">$</span>
+                <input type="number" id="break-amount" placeholder="0.00" inputmode="decimal" onkeydown="blockInvalidChars(event, true)" oninput="calculateChangeSuggestion()">
+            </div>
+            <div id="break-result" style="min-height: 20px;">
+                <small style="color:var(--sub-text); display: block; margin-top: 5px;" id="t-breaker-desc">Enter amount to break down.</small>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 5px solid var(--warning);">
+            <div class="title" style="color:var(--warning)" id="t-need-title">Change Limits</div>
+            <ul id="bank-need-list" class="report-list"></ul>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-action btn-copy" id="t-btn-copy" onclick="copyReport()">
+                <span>📋</span> <span id="lbl-copy">COPY</span>
+            </button>
+            <button class="btn-action btn-reset" id="t-btn-reset" onclick="resetForm()">
+                <span>🗑️</span> <span id="lbl-reset">RESET</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const LIMIT = 99999;
+    let currentLang = 'en';
+    const bills = [100, 50, 20, 10, 5, 2, 1];
+    const coins = [0.50, 0.25, 0.10, 0.05, 0.01];
+    
+    const breakdownOrder = [
+        { val: 5, batch: 1 },  
+        { val: 1, batch: 1 }, 
+        { val: 10, batch: 1 },
+        { val: 20, batch: 1 }
+    ];
+
+    const rollCap = { 0.50: 20, 0.25: 40, 0.10: 50, 0.05: 40, 0.01: 50 };
+    const maxLimits = { 20: 2, 10: 4, 5: 16, 1: 50 };
+
+    const i18n = {
+        es: {
+            posTitle: "Cuadre Ventas", posLabel: "VENTAS POS ($)",
+            diffLabel: "Estado", diffSub: "Diferencia", 
+            billsTitle: "Billetes", coinsTitle: "Monedas / Rollos",
+            realCash: "EFECTIVO TOTAL", fondoFijo: "FONDO:",
+            needTitle: "Límites de Cambio", btnReset: "BORRAR",
+            btnCopy: "COPIAR", confirmReset: "¿Borrar todos los conteos?", 
+            square: "CUADRADO", over: "SOBRA", short: "FALTA", 
+            missing: "Faltan", target: "Meta: ", ok: "✅ OK",
+            copied: "¡Listo!", reportHeader: "RESUMEN DE CAJA",
+            breakerTitle: "Desglose (1s y 5s)", 
+            breakerDesc: "Ingresa monto para desglosar."
+        },
+        en: {
+            posTitle: "Sales Balance", posLabel: "REPORTED POS ($)",
+            diffLabel: "Status", diffSub: "Difference",
+            billsTitle: "Bills", coinsTitle: "Coins / Rolls",
+            realCash: "TOTAL IN TILL", fondoFijo: "FLOAT:",
+            needTitle: "Change Limits", btnReset: "RESET",
+            btnCopy: "COPY", confirmReset: "Clear all data?", 
+            square: "BALANCED", over: "OVER", short: "SHORT", 
+            missing: "Missing", target: "Target: ", ok: "✅ OK",
+            copied: "Copied!", reportHeader: "CASH COUNT REPORT",
+            breakerTitle: "Change Breaker", 
+            breakerDesc: "Enter amount to break down."
+        }
+    };
+
+    let currentInventory = {};
+
+    function setup() {
+        const bArea = document.getElementById('bills-area');
+        bills.forEach(v => {
+            bArea.innerHTML += `<div class="row"><label>$${v}</label><input type="number" class="qty nav-input" data-val="${v}" min="0" max="${LIMIT}" inputmode="decimal" enterkeyhint="next" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"></div>`;
+        });
+
+        const cArea = document.getElementById('coins-area');
+        coins.forEach(v => {
+            cArea.innerHTML += `<div class="row"><label>${v*100}¢</label><div class="coin-group"><input type="number" class="qty nav-input" data-val="${v}" min="0" max="${LIMIT}" inputmode="decimal" enterkeyhint="next" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"><input type="number" class="roll-qty nav-input" data-val="${v}" min="0" max="${LIMIT}" placeholder="Rolls" inputmode="decimal" enterkeyhint="next" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"></div></div>`;
+        });
+
+        loadSettings();
+        setupNavigation();
+    }
+
+    function calculate() {
+        let total = 0;
+        currentInventory = {}; 
+        
+        document.querySelectorAll('.qty').forEach(i => {
+            let v = parseFloat(i.dataset.val), q = parseInt(i.value) || 0;
+            currentInventory[v] = (currentInventory[v] || 0) + q;
+        });
+        
+        document.querySelectorAll('.roll-qty').forEach(i => {
+            let v = parseFloat(i.dataset.val), r = parseInt(i.value) || 0;
+            currentInventory[v] = (currentInventory[v] || 0) + (r * rollCap[v]);
+        });
+
+        [...bills, ...coins].forEach(v => { total += v * (currentInventory[v] || 0); });
+        
+        document.getElementById('grand-total').innerText = `$${total.toFixed(2)}`;
+        
+        const pos = parseFloat(document.getElementById('pos-amount').value) || 0;
+        const target = parseFloat(document.getElementById('target-safe').value) || 0;
+        const diff = (total - target) - pos;
+        
+        updateDiffDisplay(diff, pos, total);
+        renderGuide(currentInventory);
+        
+        const breakInput = document.getElementById('break-amount');
+        if(breakInput.value) calculateChangeSuggestion();
+    }
+
+    function calculateChangeSuggestion() {
+        const input = document.getElementById('break-amount');
+        const resDiv = document.getElementById('break-result');
+        let amount = parseFloat(input.value);
+        const t = i18n[currentLang];
+
+        if (!amount || amount <= 0) {
+            resDiv.innerHTML = `<small style="color:var(--sub-text); display: block; margin-top: 5px;">${t.breakerDesc}</small>`;
+            return;
+        }
+
+        let cents = Math.round(amount * 100);
+        let totalCounts = {}; 
+
+        Object.keys(maxLimits).sort((a,b) => b-a).forEach(k => {
+            let denom = parseFloat(k);
+            let denomCents = Math.round(denom * 100);
+            let currentQty = currentInventory[denom] || 0;
+            let targetQty = maxLimits[denom];
+            let missing = Math.max(0, targetQty - currentQty);
+
+            if (missing > 0 && cents >= denomCents) {
+                let affordable = Math.floor(cents / denomCents);
+                let take = Math.min(missing, affordable);
+                if (take > 0) {
+                    totalCounts[denom] = (totalCounts[denom] || 0) + take;
+                    cents -= (take * denomCents);
+                }
+            }
+        });
+
+        if (cents > 0) {
+            breakdownOrder.forEach(item => {
+                let itemCost = item.val * item.batch * 100;
+                if (cents >= itemCost) {
+                    let batches = Math.floor(cents / itemCost);
+                    let totalBills = batches * item.batch;
+                    if (totalBills > 0) {
+                        totalCounts[item.val] = (totalCounts[item.val] || 0) + totalBills;
+                        cents -= (batches * itemCost);
+                    }
+                }
+            });
+        }
+
+        let html = "";
+        let hasItems = false;
+        
+        Object.keys(totalCounts).sort((a,b) => parseFloat(b) - parseFloat(a)).forEach(denom => {
+            let count = totalCounts[denom];
+            if(count > 0) {
+                hasItems = true;
+                html += `<div class="change-suggestion">
+                            <span>${count} x $${denom}</span>
+                         </div>`;
+            }
+        });
+
+        if(cents > 0) {
+            html += `<div style="color:var(--danger); font-size:0.8rem; margin-top:5px; font-weight:bold;">⚠️ Remainder: $${(cents/100).toFixed(2)}</div>`;
+        }
+        
+        if (!hasItems && cents > 0) {
+            html = `<div style="color:var(--sub-text); font-style:italic; margin-top:5px;">Cannot break with rules.</div>`;
+        }
+
+        resDiv.innerHTML = html;
+    }
+
+    function updateDiffDisplay(diff, pos, total) {
+        const diffBox = document.getElementById('diff-display');
+        const diffVal = document.getElementById('diff-value');
+        const t = i18n[currentLang];
+
+        if (pos === 0 && total === 0) {
+            diffBox.className = "diff-result neutral"; diffVal.innerText = "$0.00";
+        } else if (Math.abs(diff) < 0.01) {
+            diffBox.className = "diff-result over"; diffVal.innerText = t.square;
+        } else if (diff > 0) {
+            diffBox.className = "diff-result over"; diffVal.innerText = `${t.over} $${diff.toFixed(2)}`;
+        } else {
+            diffBox.className = "diff-result short"; diffVal.innerText = `${t.short} $${Math.abs(diff).toFixed(2)}`;
+        }
+    }
+
+    function renderGuide(inventory) {
+        const needList = document.getElementById('bank-need-list');
+        const t = i18n[currentLang];
+        needList.innerHTML = "";
+        Object.keys(maxLimits).sort((a,b)=>b-a).forEach(v => {
+            let actual = inventory[v] || 0;
+            let max = maxLimits[v];
+            if(actual < max) {
+                needList.innerHTML += `<li><span>$${v}</span> <span>${t.target}<b>${max}</b> <small style="color:var(--danger)">(${t.missing}: ${max-actual})</small></span></li>`;
+            } else {
+                needList.innerHTML += `<li><span>$${v}</span> <small style="color:var(--secondary)">${t.ok}</small></li>`;
+            }
+        });
+    }
+
+    function secureCalculate(input, allowDecimal) {
+        let val = input.value;
+        if (val < 0) input.value = 0;
+        if (allowDecimal && val.includes('.')) {
+            const parts = val.split('.');
+            if (parts[1].length > 2) input.value = parseFloat(val).toFixed(2);
+        }
+        if (input.id === 'target-safe') localStorage.setItem('cashApp_target', val);
+        calculate();
+    }
+
+    function blockInvalidChars(e, allowDecimal) {
+        let keys = ["e", "E", "-", "+"];
+        if (!allowDecimal) keys.push(".");
+        if (keys.includes(e.key)) e.preventDefault();
+    }
+
+    function resetForm() {
+        if(confirm(i18n[currentLang].confirmReset)) {
+            document.querySelectorAll('input[type="number"]').forEach(i => { 
+                if(i.id !== 'target-safe' && i.id !== 'break-amount') i.value = ''; 
+            });
+            document.getElementById('break-result').innerHTML = ''; 
+            document.getElementById('break-amount').value = '';
+            calculate();
+        }
+    }
+
+    function copyReport() {
+        const t = i18n[currentLang];
+        const date = new Date().toLocaleString();
+        const total = document.getElementById('grand-total').innerText;
+        const pos = document.getElementById('pos-amount').value || "0.00";
+        const float = document.getElementById('target-safe').value;
+        const diffText = document.getElementById('diff-value').innerText;
+        const text = `🧾 ${t.reportHeader}\n📅 ${date}\n\n💰 Total: ${total}\n🔒 Base: $${float}\n📠 POS: $${pos}\n\n📊 ${diffText}`;
+        navigator.clipboard.writeText(text).then(() => {
+            const lbl = document.getElementById('lbl-copy');
+            const original = lbl.innerText;
+            lbl.innerText = t.copied;
+            setTimeout(() => { lbl.innerText = original; }, 2000);
+        });
+    }
+
+    function setupNavigation() {
+        const inputs = document.querySelectorAll('.nav-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const nextInput = inputs[index + 1];
+                    if (nextInput) { nextInput.focus(); nextInput.select(); }
+                }
+            });
+        });
+    }
+
+    function loadSettings() {
+        const savedTarget = localStorage.getItem('cashApp_target');
+        if (savedTarget) document.getElementById('target-safe').value = savedTarget;
+        const savedLang = localStorage.getItem('cashApp_lang') || 'en';
+        setLang(savedLang);
+        const savedTheme = localStorage.getItem('cashApp_theme');
+        const toggle = document.getElementById('mode-toggle');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.body.classList.add('dark-mode');
+            toggle.checked = true;
+        } else {
+            document.body.classList.remove('dark-mode');
+            toggle.checked = false;
+        }
+        calculate();
+    }
+
+    function toggleTheme() { 
+        document.body.classList.toggle('dark-mode'); 
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('cashApp_theme', isDark ? 'dark' : 'light');
+    }
+
+    function setLang(lang) {
+        currentLang = lang;
+        localStorage.setItem('cashApp_lang', lang);
+        document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+        document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        const t = i18n[lang];
+        document.getElementById('t-pos-title').innerText = t.posTitle;
+        document.getElementById('t-pos-label').innerText = t.posLabel;
+        document.getElementById('t-diff-label').innerText = t.diffLabel;
+        document.getElementById('t-diff-sub').innerText = t.diffSub;
+        document.getElementById('t-bills-title').innerText = t.billsTitle;
+        document.getElementById('t-coins-title').innerText = t.coinsTitle;
+        document.getElementById('t-real-cash').innerText = t.realCash;
+        document.getElementById('t-fondo-fijo').innerText = t.fondoFijo;
+        document.getElementById('t-need-title').innerText = t.needTitle;
+        document.getElementById('lbl-reset').innerText = t.btnReset;
+        document.getElementById('lbl-copy').innerText = t.btnCopy;
+        
+        document.getElementById('t-breaker-title').innerText = t.breakerTitle;
+        if(!document.getElementById('break-amount').value) {
+            document.getElementById('t-breaker-desc').innerText = t.breakerDesc;
+        } else {
+            calculateChangeSuggestion(); 
+        }
+        calculate();
+    }
+
+    setup();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Closing count</title>
     <style>
