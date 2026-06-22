@@ -31,25 +31,18 @@
                 linear-gradient(45deg, var(--pattern) 25%, transparent 25%, transparent 75%, var(--pattern) 75%), 
                 linear-gradient(-45deg, var(--pattern) 25%, transparent 25%, transparent 75%, var(--pattern) 75%);
             background-size: 40px 40px;
-            margin: 0; 
-            height: 100vh; /* Pantalla completa */
-            width: 100vw;
-            overflow: hidden; /* Sin scroll */
+            margin: 0; height: 100vh; width: 100vw; overflow: hidden;
             display: flex; align-items: center; justify-content: center;
             color: var(--text); transition: all 0.3s ease;
         }
         
         .container { 
             background: var(--card-bg); 
-            /* COMPACTADO: Menos padding externo */
-            padding: 15px; 
-            border-radius: 0; border: 2px solid var(--border);
+            padding: 15px; border-radius: 0; border: 2px solid var(--border);
             box-shadow: 12px 12px 0 var(--shadow); 
             max-width: 1100px; width: 95%; 
-            /* COMPACTADO: Gap reducido de 25px a 12px */
             display: grid; grid-template-columns: 1fr 360px; gap: 12px; 
-            position: relative;
-            max-height: 98vh; /* Seguridad */
+            position: relative; max-height: 98vh;
         }
 
         .top-controls { position: absolute; top: -35px; right: 0; display: flex; align-items: center; gap: 15px; }
@@ -65,13 +58,10 @@
         .lang-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
+        input[type=number] { appearance: textfield; -moz-appearance: textfield; }
 
         .main-panel { display: flex; flex-direction: column; gap: 12px; height: 100%; }
-        /* COMPACTADO: Padding interno de tarjeta reducido */
         .card { padding: 15px; border-radius: 0; border: 1px solid var(--border); background: var(--card-bg); box-shadow: 6px 6px 0 var(--shadow); display: flex; flex-direction: column; }
-        
-        /* COMPACTADO: Margen de títulos reducido */
         .title { font-size: 0.8rem; font-weight: 800; color: var(--sub-text); text-transform: uppercase; margin-bottom: 8px; border-bottom: 3px solid var(--primary); padding-bottom: 4px; }
 
         .pos-container { display: flex; gap: 15px; align-items: stretch; width: 100%; }
@@ -79,9 +69,7 @@
         .pos-column label { font-size: 0.75rem; font-weight: bold; margin-bottom: 4px; color: var(--sub-text); }
 
         #pos-amount, .diff-result {
-            /* COMPACTADO: Altura reducida de 85px a 60px */
-            height: 60px; 
-            box-sizing: border-box; border-radius: 0;
+            height: 60px; box-sizing: border-box; border-radius: 0;
             border: 2px solid var(--border); display: flex; flex-direction: column;
             justify-content: center; transition: all 0.3s ease; width: 100%; box-shadow: 4px 4px 0 var(--shadow);
         }
@@ -99,21 +87,13 @@
         .diff-result.short { background: rgba(198, 40, 40, 0.1); color: var(--danger); border-color: var(--danger); }
         .diff-result.neutral { background: rgba(128, 128, 128, 0.08); color: var(--sub-text); }
 
-        /* COMPACTADO: Gap de grid reducido */
         .input-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 12px; 
-            flex-grow: 1; /* Ocupar espacio restante */
-            min-height: 0; /* Permitir scroll interno si es crítico */
+            flex-grow: 1; min-height: 0;
         }
-        
-        /* --- AQUÍ ESTÁ EL CAMBIO IMPORTANTE --- */
         .input-grid .card {
-            overflow-y: auto; 
-            justify-content: flex-start; /* CAMBIO: Antes era space-between. Esto sube el contenido. */
-            gap: 10px; /* CAMBIO: Añadido espacio controlado entre título y contenido */
+            overflow-y: auto; justify-content: flex-start; gap: 10px;
         }
-
-        /* COMPACTADO: Padding vertical de filas reducido drásticamente */
         .row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); }
         .row label { font-size: 1rem; font-weight: 700; width: 50px; }
         
@@ -162,21 +142,17 @@
 <div class="container">
     <div class="top-controls">
         <div class="theme-switch">
-            <span id="t-theme-label">Dark Mode</span>
+            <span>Dark Mode</span>
             <label class="switch">
                 <input type="checkbox" id="mode-toggle" onchange="toggleTheme()">
                 <span class="slider"></span>
             </label>
         </div>
-        <div>
-            <button class="lang-btn" id="btn-es" onclick="setLang('es')">ESPAÑOL</button>
-            <button class="lang-btn active" id="btn-en" onclick="setLang('en')">ENGLISH</button>
-        </div>
     </div>
 
     <div class="main-panel">
         <div class="card" style="border-top: 6px solid var(--primary); flex-shrink: 0;">
-            <div class="title" id="t-pos-title">Sales Balance</div>
+            <div class="title">Sales Balance</div>
             <div class="pos-container">
                 <div class="pos-column">
                     <label id="t-pos-label">REPORTED POS SALES ($)</label>
@@ -185,7 +161,7 @@
                 <div class="pos-column">
                     <label id="t-diff-label">Difference Status</label>
                     <div id="diff-display" class="diff-result neutral">
-                        <span id="t-diff-sub">Status</span>
+                        <span>Status</span>
                         <span id="diff-value">$0.00</span>
                     </div>
                 </div>
@@ -194,11 +170,11 @@
 
         <div class="input-grid">
             <div class="card">
-                <div class="title" id="t-bills-title">Bills</div>
+                <div class="title">Bills</div>
                 <div id="bills-area"></div>
             </div>
             <div class="card">
-                <div class="title" id="t-coins-title">Coins & Rolls</div>
+                <div class="title">Coins & Rolls</div>
                 <div id="coins-area"></div>
             </div>
         </div>
@@ -206,42 +182,38 @@
 
     <div class="side-panel">
         <div class="summary-box">
-            <div style="font-size: 0.8rem; opacity: 0.8; letter-spacing: 1.5px;" id="t-real-cash">TOTAL IN TILL</div>
+            <div style="font-size: 0.8rem; opacity: 0.8; letter-spacing: 1.5px;">TOTAL IN TILL</div>
             <div id="grand-total" style="font-size: 2.5rem; font-weight: 900; margin: 5px 0; font-family: 'Consolas', monospace;">$0.00</div>
             <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; margin-top: 5px;">
-                <span style="font-size: 0.8rem; font-weight: bold;" id="t-fondo-fijo">FIXED FLOAT:</span>
+                <span style="font-size: 0.8rem; font-weight: bold;">FIXED FLOAT:</span>
                 <input type="number" id="target-safe" value="250" style="width:90px; font-size: 1rem; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); text-align: right; padding: 5px;" onkeydown="blockInvalidChars(event, true)" oninput="secureCalculate(this, true)">
             </div>
         </div>
 
         <div class="card" style="border-left: 6px solid var(--purple); flex-shrink: 0;">
-            <div class="title" style="color:var(--purple)" id="t-breaker-title">Change Breaker</div>
+            <div class="title" style="color:var(--purple)">Change Breaker</div>
             <div class="change-input-group">
-                <input type="number" id="break-amount" placeholder="Input Amount" onkeydown="blockInvalidChars(event, true)" oninput="calculateChangeSuggestion()" style="width:100%;">
+                <button id="break-action-btn" onclick="handleBreakAction()" style="width:100%; padding:12px; font-weight:700; border:none; background:var(--primary); color:#fff; cursor:pointer;">Action</button>
             </div>
             <div id="break-result">
-                <small style="color:var(--sub-text)" id="t-breaker-desc">Enter amount to break down.</small>
+                <small style="color:var(--sub-text)">Review status and request change for tomorrow.</small>
             </div>
+            <div id="break-next-day" style="margin-top:10px; font-size:0.9rem; color:var(--text);"></div>
         </div>
 
-        <div class="card limits-card" style="border-left: 6px solid var(--warning);">
-            <div class="title" style="color:var(--warning)" id="t-need-title">Change Guide (Limits)</div>
-            <ul id="bank-need-list" class="report-list"></ul>
-        </div>
-
-        <button class="btn-reset" id="t-btn-reset" onclick="resetForm()">CLEAR DATA</button>
+        <button class="btn-reset" onclick="resetForm()">CLEAR ALL DATA</button>
     </div>
 </div>
 
 <script>
-    let currentLang = 'en';
     const LIMIT = 99999;
     
     // Configuración Original
     const bills = [100, 50, 20, 10, 5, 2, 1];
     const coins = [0.50, 0.25, 0.10, 0.05, 0.01];
     const rollCap = { 0.50: 20, 0.25: 40, 0.10: 50, 0.05: 40, 0.01: 50 };
-    const maxLimits = { 20: 2, 10: 4, 5: 16, 1: 50 };
+    const minRolls = { 0.25: 2, 0.10: 2, 0.05: 2, 0.01: 2 };
+    const desiredTill = { 20: 2, 10: 4, 5: 16, 1: 50 };
     
     // Lógica Change Breaker (Prioridad $5 y $1)
     const breakdownOrder = [
@@ -251,32 +223,18 @@
         { val: 20, batch: 1 }
     ];
 
-    const i18n = {
-        es: {
-            posTitle: "Cuadre de Ventas", posLabel: "VENTAS REPORTADAS POS ($)",
-            diffLabel: "Estado de Diferencia", diffSub: "Balance", 
-            billsTitle: "Billetes", coinsTitle: "Monedas y Rollos",
-            realCash: "TOTAL EN CAJA", fondoFijo: "FONDO FIJO:",
-            needTitle: "Guía de Cambio (Máximos)", btnReset: "BORRAR TODO EL CONTEO",
-            confirmReset: "¿Deseas borrar todos los datos?", square: "CUADRADO", 
-            over: "SOBRA", short: "FALTA", missing: "Faltan", target: "Meta: ", 
-            ok: "✅ OK", theme: "Modo Oscuro",
-            breakerTitle: "Desglose de Billetes", breakerDesc: "Ingresa monto para desglosar."
-        },
-        en: {
-            posTitle: "Sales Balance", posLabel: "REPORTED POS SALES ($)",
-            diffLabel: "Difference Status", diffSub: "Status",
-            billsTitle: "Bills", coinsTitle: "Coins & Rolls",
-            realCash: "TOTAL IN TILL", fondoFijo: "FIXED FLOAT:",
-            needTitle: "Change Guide (Limits)", btnReset: "CLEAR ALL DATA",
-            confirmReset: "Are you sure you want to clear all data?", square: "BALANCED", 
-            over: "OVER", short: "SHORT", missing: "Missing", target: "Target: ", 
-            ok: "✅ OK", theme: "Dark Mode",
-            breakerTitle: "Change Breaker", breakerDesc: "Enter amount to break down."
-        }
-    };
-
     let currentInventory = {};
+    let currentRolls = {};
+    let currentDiff = 0;
+    let currentTotal = 0;
+    let currentPos = 0;
+
+    let calculationTimeout;
+
+    function debounceCalculate() {
+        clearTimeout(calculationTimeout);
+        calculationTimeout = setTimeout(calculate, 300); // Espera 300ms antes de calcular
+    }
 
     function blockInvalidChars(e, allowDecimal) {
         let keys = ["e", "E", "-", "+"];
@@ -300,196 +258,395 @@
             }
         }
         if (input.id === 'target-safe') localStorage.setItem('cashApp_target', val);
-        calculate();
+        debounceCalculate();
     }
 
     function initTheme() {
         const toggle = document.getElementById('mode-toggle');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (prefersDark) {
+        const savedTheme = localStorage.getItem('cashApp_theme');
+
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
             document.body.classList.add('dark-mode');
             toggle.checked = true;
         }
     }
 
-    function toggleTheme() { document.body.classList.toggle('dark-mode'); }
-
-    function setLang(lang) {
-        currentLang = lang;
-        document.getElementById('btn-es').classList.toggle('active', lang === 'es');
-        document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-        const t = i18n[lang];
-        document.getElementById('t-pos-title').innerText = t.posTitle;
-        document.getElementById('t-pos-label').innerText = t.posLabel;
-        document.getElementById('t-diff-label').innerText = t.diffLabel;
-        document.getElementById('t-diff-sub').innerText = t.diffSub;
-        document.getElementById('t-bills-title').innerText = t.billsTitle;
-        document.getElementById('t-coins-title').innerText = t.coinsTitle;
-        document.getElementById('t-real-cash').innerText = t.realCash;
-        document.getElementById('t-fondo-fijo').innerText = t.fondoFijo;
-        document.getElementById('t-need-title').innerText = t.needTitle;
-        document.getElementById('t-btn-reset').innerText = t.btnReset;
-        document.getElementById('t-theme-label').innerText = t.theme;
-        
-        document.getElementById('t-breaker-title').innerText = t.breakerTitle;
-        if(!document.getElementById('break-amount').value) {
-            document.getElementById('t-breaker-desc').innerText = t.breakerDesc;
-        } else {
-            calculateChangeSuggestion(); 
-        }
-
-        calculate();
+    function toggleTheme() { 
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('cashApp_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     }
 
     function setup() {
         const bArea = document.getElementById('bills-area');
+        let billsHtml = '';
         bills.forEach(v => {
-            bArea.innerHTML += `<div class="row"><label>$${v}</label><input type="number" class="qty" data-val="${v}" min="0" max="${LIMIT}" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"></div>`;
+            billsHtml += `<div class="row"><label>$${v}</label><input type="number" class="qty" data-val="${v}" min="0" max="${LIMIT}" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"></div>`;
         });
+        bArea.innerHTML = billsHtml;
+
         const cArea = document.getElementById('coins-area');
+        let coinsHtml = '';
         coins.forEach(v => {
-            cArea.innerHTML += `<div class="row"><label>${v*100}¢</label><div style="display:flex; gap:6px;"><input type="number" class="qty" data-val="${v}" min="0" max="${LIMIT}" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"><input type="number" class="roll-qty" data-val="${v}" min="0" max="${LIMIT}" placeholder="R" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"></div></div>`;
+            if (v === 0.50) {
+                coinsHtml += `<div class="row"><label>${v*100}¢</label><div style="display:flex; gap:6px;"><input type="number" class="qty" data-val="${v}" min="0" max="${LIMIT}" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"><div style="width: 75px; padding: 6px;"></div></div></div>`;
+            } else {
+                coinsHtml += `<div class="row"><label>${v*100}¢</label><div style="display:flex; gap:6px;"><input type="number" class="qty" data-val="${v}" min="0" max="${LIMIT}" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"><input type="number" class="roll-qty" data-val="${v}" min="0" max="${LIMIT}" placeholder="R" onkeydown="blockInvalidChars(event, false)" onfocus="this.select()" oninput="secureCalculate(this, false)"></div></div>`;
+            }
         });
+        cArea.innerHTML = coinsHtml;
         
         const savedTarget = localStorage.getItem('cashApp_target');
         if (savedTarget) document.getElementById('target-safe').value = savedTarget;
 
         initTheme();
-        setLang('en');
+        calculate();
     }
 
     function calculate() {
         let total = 0;
         let inventory = {};
+        currentInventory = {};
+        currentRolls = {};
         document.querySelectorAll('.qty').forEach(i => {
             let v = parseFloat(i.dataset.val), q = parseInt(i.value) || 0;
             inventory[v] = (inventory[v] || 0) + q;
         });
         document.querySelectorAll('.roll-qty').forEach(i => {
             let v = parseFloat(i.dataset.val), r = parseInt(i.value) || 0;
+            if (v === 0.50) return;
             inventory[v] = (inventory[v] || 0) + (r * rollCap[v]);
+            currentRolls[v] = r;
         });
         [...bills, ...coins].forEach(v => { total += v * (inventory[v] || 0); });
         document.getElementById('grand-total').innerText = `$${total.toFixed(2)}`;
+        currentInventory = inventory;
         
         const pos = parseFloat(document.getElementById('pos-amount').value) || 0;
         const target = parseFloat(document.getElementById('target-safe').value) || 0;
+        currentPos = pos;
         const diff = (total - target) - pos;
         const diffBox = document.getElementById('diff-display');
         const diffVal = document.getElementById('diff-value');
-        const t = i18n[currentLang];
 
         if (pos === 0 && total === 0) {
             diffBox.className = "diff-result neutral"; diffVal.innerText = "$0.00";
         } else if (Math.abs(diff) < 0.01) {
-            diffBox.className = "diff-result over"; diffVal.innerText = t.square;
+            diffBox.className = "diff-result over"; diffVal.innerText = "BALANCED";
         } else if (diff > 0) {
-            diffBox.className = "diff-result over"; diffVal.innerText = `${t.over} $${diff.toFixed(2)}`;
+            diffBox.className = "diff-result over"; diffVal.innerText = `OVER $${diff.toFixed(2)}`;
         } else {
-            diffBox.className = "diff-result short"; diffVal.innerText = `${t.short} $${Math.abs(diff).toFixed(2)}`;
+            diffBox.className = "diff-result short"; diffVal.innerText = `SHORT $${Math.abs(diff).toFixed(2)}`;
         }
-        renderGuide(inventory);
-        
-        const breakInput = document.getElementById('break-amount');
-        if(breakInput.value) calculateChangeSuggestion();
+        currentDiff = diff;
+        currentTotal = total;
+        updateBreakButton();
     }
 
-    // LÓGICA DE DESGLOSE (CONSOLIDADA)
-    function calculateChangeSuggestion() {
-        const input = document.getElementById('break-amount');
-        const resDiv = document.getElementById('break-result');
-        let amount = parseFloat(input.value);
-        const t = i18n[currentLang];
+    function formatMoney(value) {
+        return `$${value.toFixed(2)}`;
+    }
 
-        if (!amount || amount <= 0) {
-            resDiv.innerHTML = `<small style="color:var(--sub-text)">${t.breakerDesc}</small>`;
+    function updateBreakButton() {
+        const btn = document.getElementById('break-action-btn');
+        if (currentTotal <= 0) {
+            btn.innerText = "Click to get recommendation";
+            btn.disabled = true;
+            btn.style.opacity = 0.65;
             return;
         }
+        btn.disabled = false;
+        btn.style.opacity = 1;
+        if (currentDiff < -0.01) {
+            btn.innerText = "Short cash";
+        } else if (currentDiff > 0.01) {
+            btn.innerText = "Excess cash";
+        } else {
+            btn.innerText = "Till balanced";
+        }
+    }
 
+    function handleBreakAction() {
+        renderBreakRecommendations();
+    }
+
+    function getBillInventory() {
+        const inventory = {};
+        [100, 50, 20, 10, 5, 2, 1].forEach(val => {
+            inventory[val] = currentInventory[val] || 0;
+        });
+        return inventory;
+    }
+
+    function getExtraBillPool() {
+        const pool = {};
+        [100, 50, 20, 10, 5, 2, 1].forEach(val => {
+            const total = currentInventory[val] || 0;
+            if (desiredTill.hasOwnProperty(val)) {
+                pool[val] = Math.max(0, total - desiredTill[val]);
+            } else {
+                pool[val] = total;
+            }
+        });
+        return pool;
+    }
+
+    function buildGreedyPlan(amount, order) {
         let cents = Math.round(amount * 100);
-        let totalCounts = {}; 
+        const counts = {};
+        order.forEach(val => {
+            const denomCents = Math.round(val * 100);
+            const count = Math.floor(cents / denomCents);
+            if (count > 0) {
+                counts[val] = count;
+                cents -= count * denomCents;
+            }
+        });
+        return { counts, remainder: cents };
+    }
 
-        // 1. Llenar Huecos de Guía
-        Object.keys(maxLimits).sort((a,b) => b-a).forEach(k => {
-            let denom = parseFloat(k);
-            let denomCents = Math.round(denom * 100);
-            let currentQty = currentInventory[denom] || 0;
-            let targetQty = maxLimits[denom];
-            let missing = Math.max(0, targetQty - currentQty);
+    function buildCoinPlanWithInventory(amount, inventory) {
+        let centsTarget = Math.round(amount * 100);
+        const counts = {};
+        [0.50, 0.25, 0.10, 0.05, 0.01].forEach(val => {
+            const available = inventory[val] || 0;
+            const denom = Math.round(val * 100);
+            const use = Math.min(Math.floor(centsTarget / denom), available);
+            if (use > 0) {
+                counts[val] = use;
+                centsTarget -= use * denom;
+            }
+        });
+        return { counts, possible: centsTarget === 0 };
+    }
 
-            if (missing > 0 && cents >= denomCents) {
-                let affordable = Math.floor(cents / denomCents);
-                let take = Math.min(missing, affordable);
-                if (take > 0) {
-                    totalCounts[denom] = (totalCounts[denom] || 0) + take;
-                    cents -= (take * denomCents);
-                }
+    function buildBillPlanWithInventory(amount, inventory) {
+        let centsTarget = Math.round(amount * 100);
+        const counts = {};
+        [100, 50, 20, 10, 5, 2, 1].forEach(val => {
+            const available = inventory[val] || 0;
+            const denom = val * 100;
+            const use = Math.min(Math.floor(centsTarget / denom), available);
+            if (use > 0) {
+                counts[val] = use;
+                centsTarget -= use * denom;
+            }
+        });
+        return { counts, possible: centsTarget === 0 };
+    }
+
+    function sumInventoryValue(inventory) {
+        return Object.keys(inventory).reduce((sum, key) => {
+            const value = parseFloat(key);
+            const qty = inventory[key] || 0;
+            return sum + value * qty;
+        }, 0);
+    }
+
+    function getMissingCoinRollRequests() {
+        const needed = {};
+        Object.keys(minRolls).forEach(v => {
+            const actualRolls = currentRolls[v] || 0;
+            let missing = minRolls[v] - actualRolls;
+            if (missing > 0) {
+                needed[parseFloat(v)] = missing;
+            }
+        });
+        return needed;
+    }
+
+    function buildNextDayRequestPlan(amount) {
+        let remaining = Math.floor(amount); // Usar solo la parte entera para billetes y rollos
+        const requestedRolls = getMissingCoinRollRequests();
+        const plan = { coinRolls: {}, tens: 0, fives: 0, ones: 0 };
+
+        // Lógica de rollos de monedas
+        const rollValues = [
+            { denom: 0.25, value: 10, max: 2 },
+            { denom: 0.10, value: 5,  max: 2 },
+            { denom: 0.05, value: 2,  max: 2 },
+        ];
+
+        rollValues.forEach(({ denom, value, max }) => {
+            const needed = requestedRolls[denom] || 0;
+            if (needed > 0 && remaining >= value) {
+                const canBuy = Math.floor(remaining / value);
+                const buy = Math.min(canBuy, needed, max);
+                plan.coinRolls[denom] = (plan.coinRolls[denom] || 0) + buy;
+                remaining -= buy * value;
             }
         });
 
-        // 2. Usar Resto (Prioridad 5 y 1)
-        if (cents > 0) {
-            breakdownOrder.forEach(item => {
-                let itemCost = item.val * item.batch * 100;
-                if (cents >= itemCost) {
-                    let batches = Math.floor(cents / itemCost);
-                    let totalBills = batches * item.batch;
-                    if (totalBills > 0) {
-                        totalCounts[item.val] = (totalCounts[item.val] || 0) + totalBills;
-                        cents -= (batches * itemCost);
-                    }
+        // Lógica especial para rollos de 1 centavo
+        const penniesNeeded = requestedRolls[0.01] || 0;
+        if (penniesNeeded > 0 && remaining >= 1) { // 2 rollos de 1¢ cuestan $1
+            plan.coinRolls[0.01] = 2; // Siempre pedir 2
+            remaining -= 1;
+        }
+
+        // Lógica de billetes
+        plan.tens = Math.min(Math.floor(remaining / 10), 4); // Máximo 4 billetes de $10
+        remaining -= plan.tens * 10;
+
+        plan.fives = Math.min(Math.floor(remaining / 5), 16); // Máximo 16 billetes de $5
+        remaining -= plan.fives * 5;
+
+        plan.ones = remaining; // El resto en billetes de $1
+        return plan;
+    }
+
+    function buildDepositPlan() {
+        const billInventory = getExtraBillPool();
+        const coinInventory = {};
+        coins.forEach(v => { coinInventory[v] = currentInventory[v] || 0; });
+
+        const depositAmount = currentPos;
+        const centsPart = Math.round((depositAmount - Math.floor(depositAmount)) * 100) / 100;
+        const dollarPart = Math.floor(depositAmount);
+
+        const coinPlan = centsPart > 0 ? buildCoinPlanWithInventory(centsPart, coinInventory) : { counts: {}, possible: true };
+        const extraBillTotal = sumInventoryValue(billInventory);
+        const billExactPlan = buildBillPlanWithInventory(dollarPart, billInventory);
+        const billPlan = {
+            total: extraBillTotal,
+            needed: dollarPart,
+            remaining: Math.max(0, extraBillTotal - dollarPart),
+            counts: billExactPlan.counts,
+            exact: billExactPlan.possible,
+            possible: extraBillTotal >= dollarPart
+        };
+
+        return { billPlan, coinPlan, possible: coinPlan.possible && billPlan.possible };
+    }
+
+    function getBankBagLines() {
+        const lines = [];
+        if (currentPos <= 0) return lines;
+
+        const deposit = buildDepositPlan();
+        if (!deposit.possible) {
+            if (!deposit.coinPlan.possible) lines.push("Need more coins to complete the cents for the POS deposit.");
+            if (!deposit.billPlan.possible) lines.push("Need more bills to complete the POS deposit.");
+            return lines;
+        }
+
+        lines.push(`Deposit from extra bills: ${formatMoney(deposit.billPlan.needed)} (Extra available: ${formatMoney(deposit.billPlan.total)})`); // This line was already hardcoded.
+        
+        const extraBillPool = getExtraBillPool();
+        const billsAvailable = [];
+        [100, 50, 20, 10, 5, 2, 1].forEach(val => {
+            const qty = extraBillPool[val] || 0;
+            if (qty > 0) {
+                billsAvailable.push(`${qty} x $${val}`);
+            }
+        });
+        if (billsAvailable.length > 0) {
+            lines.push(`Bills to withdraw from till: ${billsAvailable.join(', ')}`);
+        }
+        
+        if (deposit.billPlan.exact) {
+            Object.keys(deposit.billPlan.counts).sort((a, b) => parseInt(b) - parseInt(a)).forEach(val => {
+                if (parseInt(val) > 0) {
+                    lines.push(`${deposit.billPlan.counts[val]} x $${val}`);
                 }
             });
         }
-
-        // 3. Renderizar Consolidado
-        let html = "";
-        let hasItems = false;
-        
-        // Orden descendente
-        Object.keys(totalCounts).sort((a,b) => parseFloat(b) - parseFloat(a)).forEach(denom => {
-            let count = totalCounts[denom];
-            if(count > 0) {
-                hasItems = true;
-                html += `<div class="change-suggestion">
-                            <span>${count} x $${denom}</span>
-                         </div>`;
-            }
+        Object.keys(deposit.coinPlan.counts).sort((a, b) => parseFloat(b) - parseFloat(a)).forEach(val => {
+            lines.push(`${deposit.coinPlan.counts[val]} x ${Math.round(parseFloat(val) * 100)}¢`);
         });
-
-        if(cents > 0) {
-            html += `<div style="color:var(--danger); font-size:0.8rem; margin-top:5px; font-weight:bold;">⚠️ Remainder: $${(cents/100).toFixed(2)}</div>`;
+        if (deposit.billPlan.remaining > 0) {
+            lines.push(`Remaining extra after deposit: ${formatMoney(deposit.billPlan.remaining)}`);
         }
-        
-        if (!hasItems && cents > 0) {
-            html = `<div style="color:var(--sub-text); font-style:italic;">Cannot break with rules.</div>`;
-        }
-
-        resDiv.innerHTML = html;
+        return lines;
     }
 
-    function renderGuide(inventory) {
-        const needList = document.getElementById('bank-need-list');
-        const t = i18n[currentLang];
-        needList.innerHTML = "";
-        Object.keys(maxLimits).sort((a,b)=>b-a).forEach(v => {
-            let actual = inventory[v] || 0;
-            let max = maxLimits[v];
-            if(actual < max) {
-                needList.innerHTML += `<li><span>$${v}</span> <span>${t.target}<b>${max}</b> <small style="color:var(--danger)">(${t.missing}: ${max-actual})</small></span></li>`;
+    function getRequestChangeLines() {
+        const lines = [];
+        if (currentPos <= 0) return ["No additional request needed."];
+
+        const deposit = buildDepositPlan();
+        if (!deposit.possible) {
+            return ["Cannot make the exact deposit with available bills/coins."];
+        }
+
+        if (deposit.billPlan.remaining > 0) {
+            lines.push(`Extra available for next-day change: ${formatMoney(deposit.billPlan.remaining)}`);
+            lines.push("Bills and rolls for next day change:");
+            const requestPlan = buildNextDayRequestPlan(deposit.billPlan.remaining);
+            Object.keys(requestPlan.coinRolls).map(v => parseFloat(v)).sort((a, b) => b - a).forEach(denom => {
+                const rollTexts = {
+                    0.25: "quarter roll(s)",
+                    0.10: "dime roll(s)",
+                    0.05: "nickel roll(s)",
+                    0.01: "penny roll(s)"
+                };
+                lines.push(`${requestPlan.coinRolls[denom]} ${rollTexts[denom]}`);
+            });
+            ['tens', 'fives', 'ones'].forEach(billKey => {
+                if (requestPlan[billKey] > 0) {
+                    const billValue = {tens: 10, fives: 5, ones: 1}[billKey];
+                    lines.push(`${requestPlan[billKey]} x $${billValue}`);
+                }
+            });
+        } else {
+            lines.push("No extra bills remain after deposit.");
+        }
+
+        if (lines.length === 0) {
+            return ["No additional request needed."];
+        }
+        return lines;
+    }
+
+    function renderBreakRecommendations() {
+        const resDiv = document.getElementById('break-result');
+        const nextDiv = document.getElementById('break-next-day');
+        let html = '';
+        let nextHtml = '';
+
+        if (currentTotal <= 0) {
+            html = `<small style="color:var(--sub-text)">Click to get recommendation</small>`;
+        } else {
+            const bagLines = getBankBagLines();
+            if (bagLines.length) {
+                html += `<div class="change-suggestion"><span>Put in bank bag for POS deposit:</span></div>`;
+                bagLines.forEach(line => {
+                    html += `<div class="change-suggestion"><span>${line}</span></div>`;
+                });
             } else {
-                needList.innerHTML += `<li><span>$${v}</span> <small style="color:var(--secondary)">${t.ok}</small></li>`;
+                html += `<div class="change-suggestion"><span>No extra bills/rolls for bag.</span></div>`;
             }
+
+            if (currentDiff < -0.01) {
+                const shortage = Math.abs(currentDiff);
+                const plan = buildGreedyPlan(shortage, [20, 10, 5, 2, 1, 0.50, 0.25, 0.10, 0.05, 0.01]);
+                html += `<div style="margin-top:10px; font-weight:700;">Needed to cover shortage: ${formatMoney(shortage)}</div>`;
+                Object.keys(plan.counts).sort((a, b) => parseFloat(b) - parseFloat(a)).forEach(val => {
+                    html += `<div class="change-suggestion"><span>${plan.counts[val]} x $${val}</span></div>`;
+                });
+                if (plan.remainder > 0) {
+                    html += `<div style="color:var(--danger); font-size:0.8rem; margin-top:5px;">Remainder: ${formatMoney(plan.remainder / 100)}</div>`;
+                }
+            }
+        }
+
+        const requestLines = getRequestChangeLines();
+        nextHtml += `<div style="font-weight:700; margin-bottom:6px;">Request for next day</div>`;
+        requestLines.forEach(line => {
+            nextHtml += `<div class="change-suggestion"><span>${line}</span></div>`;
         });
+
+        resDiv.innerHTML = html;
+        nextDiv.innerHTML = nextHtml;
     }
 
     function resetForm() {
-        if(confirm(i18n[currentLang].confirmReset)) {
+        if(confirm("Are you sure you want to clear all data?")) {
             document.querySelectorAll('input[type="number"]').forEach(i => { 
-                if(i.id !== 'target-safe' && i.id !== 'break-amount') i.value = ''; 
+                if(i.id !== 'target-safe') i.value = ''; 
             });
             document.getElementById('break-result').innerHTML = ''; 
-            document.getElementById('break-amount').value = '';
+            document.getElementById('break-next-day').innerHTML = '';
             calculate();
         }
     }
