@@ -5,121 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shipping Label Printer</title>
     <style>
-        :root {
-            --bg: #f4f7f6;
-            --text: #333;
-            --card-bg: #ffffff;
-            --border: #eee;
-            --dashed-border: #ddd;
-            --highlight: #007bff;
-            --button-hover: #0056b3;
-            --disabled-button: #cccccc;
-            --paste-area-border: #ccc;
-            --paste-area-active-border: #28a745;
-            --paste-area-active-bg: #e6ffe6;
-        }
-        body.dark-mode {
-            --bg: #282c34;
-            --text: #e0e0e0;
-            --card-bg: #3c4048;
-            --border: #555;
-            --dashed-border: #666;
-            --highlight: #61dafb;
-            --button-hover: #21a1f1;
-            --disabled-button: #555;
-            --paste-area-border: #777;
-            --paste-area-active-border: #4caf50;
-            --paste-area-active-bg: #4a515c;
-        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: var(--bg);
+            background-color: #f4f7f6;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            color: var(--text);
-            transition: background-color 0.3s, color 0.3s;
-            padding: 10px; /* Reduced from 20px */
+            color: #333;
         }
         .container {
-            background-color: var(--card-bg);
+            background-color: #ffffff;
             padding: 25px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 800px; /* Max width for the container */
-            margin-bottom: 5px; /* Reduced from 10px */
+            max-width: 800px;
+            margin-bottom: 20px;
             text-align: center;
-            flex-shrink: 0; /* Prevent shrinking */
-            box-sizing: border-box;
         }
-        /* Specific paragraph style to reduce its margin */
         h1 {
-            color: var(--highlight);
-            margin-bottom: 10px; /* Reduced from 20px */
+            color: #007bff;
+            margin-bottom: 20px;
         }
-        .container p {
-            margin-top: 0;
-            margin-bottom: 10px;
+        .paste-area {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.1em;
+            color: #666;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        .paste-area:hover {
+            border-color: #007bff;
+        }
+        .paste-area.active {
+            border-color: #28a745;
+            background-color: #e6ffe6;
+        }
+        .label-half-page.active-paste-target {
+            border-color: #007bff; /* Highlight active target */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+        }
+
+        .mode-switch-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        .mode-switch-btn {
+            padding: 8px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            cursor: pointer;
             font-size: 0.9em;
+            transition: all 0.2s ease;
         }
+        .mode-switch-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
         button {
             padding: 12px 25px;
-            background-color: var(--highlight);
+            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             font-size: 1.1em;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin-top: 10px; /* Reduced from 20px */
+            margin-top: 20px;
         }
         button:hover {
-            background-color: var(--button-hover);
+            background-color: #0056b3;
         }
         button:disabled {
-            background-color: var(--disabled-button);
+            background-color: #cccccc;
             cursor: not-allowed;
         }
 
         /* Estilos para la vista previa y la impresión */
         .print-preview-container {
-            flex-grow: 1; /* Take up remaining vertical space */
-            overflow-y: auto; /* Allow scrolling within the preview if labels overflow */
-            display: grid; /* Use grid for layout */
-            gap: 5px; /* Reduced from 10px */
-            margin-top: 5px; /* Reduced from 10px */
+            display: flex;
+            flex-wrap: wrap; /* Permite que las etiquetas se envuelvan en pantallas pequeñas */
+            justify-content: center;
+            gap: 20px; /* Espacio entre las etiquetas en la vista previa */
+            margin-top: 30px;
             width: 100%;
             max-width: 8.5in; /* Ancho de una hoja carta */
-            border: 1px solid var(--border);
-            padding: 2px; /* Reduced from 5px */
+            border: 1px solid #eee; /* Borde para visualizar el área de la hoja */
+            padding: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            background-color: var(--card-bg);
-            box-sizing: border-box;
-            grid-template-columns: 1fr; /* Default to 1 column for 2-up preview */
-            grid-auto-rows: min-content; /* Allow rows to size based on content */
-            justify-content: center;
+            background-color: #fff;
         }
-        .print-preview-container.labels-4-up {
-            grid-template-columns: 1fr 1fr; /* 2 columns for 4-up preview */
+        /* Styles for 4-up mode */
+        .print-preview-container.four-up-mode {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Two columns */
+            gap: 10px; /* Adjust gap as needed */
+            padding: 0.25in; /* Small padding inside the container */
+            /* Explicitly set dimensions for screen preview to match letter size */
+            width: 8.5in; /* Full letter width */
+            height: 11in; /* Full letter height */
+            /* Override flex-wrap and justify-content from default .print-preview-container */
+            flex-wrap: nowrap; /* Ensure no wrapping */
+            justify-content: flex-start; /* Align to start of grid */
+        }
+        .print-preview-container.four-up-mode .label-half-page {
+            width: 4.25in; /* Each label is half width of letter */
+            height: 5.5in; /* Each label is half height of letter */
         }
 
         .label-half-page {
-            border: 1px dashed var(--dashed-border);
+            width: 8.5in; /* Ancho de la mitad de la hoja (vertical) */
+            height: 5.5in; /* Alto de la mitad de la hoja (vertical) */
+            border: 1px dashed #ddd;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden; /* Asegura que la imagen no se salga */
-            background-color: var(--bg); /* Use body bg for label background */
+            background-color: #f9f9f9;
             position: relative; /* Para posicionar la imagen */
-            aspect-ratio: 8.5 / 5.5; /* Default aspect ratio for 2-up (Letter half) */
-            box-sizing: border-box;
-        }
-        .print-preview-container.labels-4-up .label-half-page {
-            aspect-ratio: 4.25 / 5.5; /* Aspect ratio for 4-up (Letter quarter, portrait) */
         }
 
         .label-half-page img {
@@ -127,66 +141,72 @@
             max-height: 100%;
             object-fit: contain; /* Asegura que la imagen se ajuste sin recortarse */
             transform-origin: center center; /* Punto de rotación */
-        }
-        /* Visual feedback for drag over */
-        .label-half-page.drag-over {
-            border: 2px dashed var(--paste-area-active-border);
-            background-color: var(--paste-area-active-bg);
+            /* Las transformaciones de rotación y escala se aplicarán con JS */
         }
 
-        .label-half-page.empty::before, .label-half-page.selected-label::before {
-            content: "Paste image here";
+        .label-half-page.empty::before {
+            content: "Click to select, then paste image (Ctrl+V)";
             color: #bbb;
             font-style: italic;
             font-size: 0.9em;
-            pointer-events: none; /* Allow clicks to pass through */
-        }
-        .label-half-page.selected-label {
-            border: 2px solid var(--highlight);
-            box-shadow: 0 0 5px var(--highlight);
         }
 
         /* Estilos específicos para impresión */
-        @media print {
+        @media print { /* Specific styles for printing */
             body {
-                background-color: #fff; /* Force white background for print */
+                background-color: #fff; /* White background for print */
                 padding: 0;
                 margin: 0;
                 display: block; /* Anula flexbox para impresión */
             }
-            .container, button, .paste-area, .top-controls {
-                display: none; /* Oculta elementos no deseados en la impresión */
+            .container, button, .paste-area {
+                display: none; /* Hide unwanted elements in print */
             }
             .print-preview-container {
                 width: 8.5in; /* Ancho de la hoja carta */
                 height: 11in; /* Alto de la hoja carta */
-                border: none;
+                border: none; /* No border for print */
+                /* Default for 2-up, will be overridden by .four-up-mode */
+                display: block;
+                gap: 0;
+                padding: 0;
+                margin: 0;
+                box-shadow: none;
+                background-color: #fff;
                 box-shadow: none;
                 padding: 0;
                 margin: 0;
-                display: grid; /* Use grid for print layout */
-                gap: 0;
-                grid-template-columns: 1fr 1fr; /* Always 2 columns for print */
-                grid-template-rows: 1fr 1fr; /* Always 2 rows for print */
+                display: block; /* Anula flexbox para impresión */
             }
             .label-half-page {
-                width: 100%; /* Fill grid cell */
-                height: 100%; /* Fill grid cell */
-                border: none;
+                width: 8.5in;
+                height: 5.5in;
+                border: none; /* No border for print */
                 page-break-after: avoid; /* Evita saltos de página inesperados */
                 margin: 0;
                 padding: 0;
-                aspect-ratio: unset; /* Let grid define dimensions */
             }
-            .label-half-page.empty {
+            .label-half-page.empty { /* Do not print empty placeholders */
                 display: none; /* No imprimir espacios vacíos */
             }
             .label-half-page.empty::before {
                 content: none;
             }
+            /* New print styles for 4-up */
+            .print-preview-container.four-up-mode {
+                display: grid; /* Override display: block */
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0;
+                padding: 0;
+            }
+            .print-preview-container.four-up-mode .label-half-page {
+                width: 4.25in; /* Override width for 4-up */
+                height: 5.5in; /* Same height as 2-up, but half width */
+                border: none;
+            }
             /* Asegura que la página sea tamaño carta */
             @page {
-                size: Letter; /* Tamaño de papel carta */
+                size: Letter; /* Letter paper size */
                 margin: 0.5in; /* Márgenes mínimos para la impresión */
             }
         }
@@ -194,147 +214,96 @@
 </head>
 <body>
 
-    <div class="top-controls">
-        <div class="theme-switch">
-            <span>Dark Mode</span>
-            <label class="switch">
-                <input type="checkbox" id="mode-toggle" onchange="toggleTheme()">
-                <span class="slider"></span>
-            </label>
-        </div>
-    </div>
-
     <div class="container">
-        <h1>Shipping Label Printer</h1>
-        <p>Paste an image (Ctrl+V or Cmd+V) or drag and drop directly into a label slot below. The page will be divided into sections (Letter size) and images will automatically adjust.</p>
-        <div style="margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 15px;">
-            <label for="labelsPerPage" style="font-weight: bold;">Labels per page:</label>
-            <select id="labelsPerPage" onchange="setLabelsPerPage(this.value)">
-                <option value="2">2</option>
-                <option value="4">4</option>
-            </select>
+        <h1>Shipping Label Printer (2-Up / 4-Up)</h1>
+        <p>Click on one of the label areas below to select it, then paste your image (Ctrl+V or Cmd+V). The image will adjust automatically.</p>
+        
+        <div class="mode-switch-container">
+            <button id="mode-switch-two-up" class="mode-switch-btn active" onclick="switchMode('two-up')">2 Labels per Page</button>
+            <button id="mode-switch-four-up" class="mode-switch-btn" onclick="switchMode('four-up')">4 Labels per Page</button>
         </div>
-        <div style="margin-top: 10px;">
-            <button onclick="printLabels()" id="printButton" disabled>Print Labels</button>
-            <button onclick="clearLabels()" id="clearButton" style="background-color: #dc3545; margin-left: 10px;" disabled>Clear</button>
-        </div>
+
+        <button onclick="printLabels()" id="printButton" disabled>Print Labels</button>
+        <button onclick="clearLabels()" id="clearButton" style="background-color: #dc3545; margin-left: 10px;" disabled>Clear</button>
     </div>
 
     <div class="print-preview-container" id="printPreviewContainer">
-        <!-- Labels will be dynamically generated here -->
+        <!-- Labels will be dynamically generated here by JavaScript -->
     </div>
 
     <script>
         const printButton = document.getElementById('printButton');
         const clearButton = document.getElementById('clearButton');
-        const labelsPerPageSelect = document.getElementById('labelsPerPage');
-        const printPreviewContainer = document.getElementById('printPreviewContainer');
 
-        let labels = []; // Array to hold references to label divs
-        let currentLabelIndex = 0; // Index for next available label
-        let selectedLabelIndex = -1; // -1 if no label is selected
-        let labelsPerPage = parseInt(labelsPerPageSelect.value); // Default from select
-
-        const LETTER_WIDTH_IN = 8.5;
-        const LETTER_HEIGHT_IN = 11;
-        const DPI = 96; // Standard browser DPI
-
-        let targetLabelWidthPx;
-        let targetLabelHeightPx;
-
-        // Initialize theme on load
-        initTheme();
-        // Setup labels based on initial selection
-        setupLabels();
+        let currentMode = 'two-up'; // 'two-up' or 'four-up'
+        let labels = []; // This will be dynamically populated
+        let selectedLabelElement = null; // To track which label is currently selected for pasting
 
         // Evento de pegar en el documento
         document.addEventListener('paste', handlePaste);
 
-        function initTheme() {
-            const toggle = document.getElementById('mode-toggle');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const savedTheme = localStorage.getItem('shippingLabelApp_theme');
+        function attachLabelEventListeners(label) {
+            label.addEventListener('click', () => {
+                if (selectedLabelElement) {
+                    selectedLabelElement.classList.remove('active-paste-target');
+                }
+                selectedLabelElement = label;
+                selectedLabelElement.classList.add('active-paste-target');
+            });
 
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                document.body.classList.add('dark-mode');
-                toggle.checked = true;
-            }
+            label.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                label.classList.add('active');
+            });
+            label.addEventListener('dragleave', () => {
+                label.classList.remove('active');
+            });
+            label.addEventListener('drop', (e) => {
+                e.preventDefault();
+                label.classList.remove('active'); // Pass the target label
+                handleDrop(e, label);
+            });
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('shippingLabelApp_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-        }
+        function renderLabels(mode) {
+            const container = document.getElementById('printPreviewContainer');
+            container.innerHTML = ''; // Clear existing labels
+            labels = []; // Clear the array
 
-        function updateTargetLabelDimensions() {
-            if (labelsPerPage === 2) {
-                targetLabelWidthPx = LETTER_WIDTH_IN * DPI;
-                targetLabelHeightPx = (LETTER_HEIGHT_IN / 2) * DPI;
-            } else { // labelsPerPage === 4
-                targetLabelWidthPx = (LETTER_WIDTH_IN / 2) * DPI;
-                targetLabelHeightPx = (LETTER_HEIGHT_IN / 2) * DPI;
-            }
-        }
-
-        function setupLabels() {
-            printPreviewContainer.innerHTML = ''; // Clear existing labels
-            labels = []; // Clear labels array
-            currentLabelIndex = 0;
-            selectedLabelIndex = -1;
-
-            if (labelsPerPage === 4) {
-                printPreviewContainer.classList.add('labels-4-up');
-            } else {
-                printPreviewContainer.classList.remove('labels-4-up');
+            let numLabels;
+            if (mode === 'two-up') {
+                numLabels = 2;
+                container.classList.remove('four-up-mode');
+            } else { // 'four-up'
+                numLabels = 4;
+                container.classList.add('four-up-mode');
             }
 
-            for (let i = 0; i < labelsPerPage; i++) {
+            for (let i = 0; i < numLabels; i++) {
                 const labelDiv = document.createElement('div');
                 labelDiv.classList.add('label-half-page', 'empty');
-                labelDiv.dataset.labelIndex = i;
-                labelDiv.addEventListener('click', selectLabel);
-                printPreviewContainer.appendChild(labelDiv);
+                labelDiv.id = `label${i + 1}`;
+                container.appendChild(labelDiv);
                 labels.push(labelDiv);
-                // Add drag and drop listeners to each label slot
-                labelDiv.addEventListener('dragover', handleDragOver);
-                labelDiv.addEventListener('dragleave', handleDragLeave);
-                labelDiv.addEventListener('drop', handleDrop);
+
+                attachLabelEventListeners(labelDiv);
             }
-            updateTargetLabelDimensions();
+
+            selectedLabelElement = labels[0];
+            if (selectedLabelElement) {
+                selectedLabelElement.classList.add('active-paste-target');
+            }
             updateButtons();
         }
 
-        function setLabelsPerPage(count) {
-            labelsPerPage = parseInt(count);
-            setupLabels(); // Re-render labels
+        function switchMode(mode) {
+            currentMode = mode;
+            localStorage.setItem('labelPrinterMode', mode); // Persist mode
+            renderLabels(mode);
+            // Update UI for mode switch buttons
+            document.getElementById('mode-switch-two-up').classList.toggle('active', mode === 'two-up');
+            document.getElementById('mode-switch-four-up').classList.toggle('active', mode === 'four-up');
         }
-
-        function selectLabel(event) {
-            // Deselect previous
-            if (selectedLabelIndex !== -1 && labels[selectedLabelIndex]) {
-                labels[selectedLabelIndex].classList.remove('selected-label');
-            }
-
-            const clickedLabel = event.currentTarget;
-            const index = parseInt(clickedLabel.dataset.labelIndex);
-
-            selectedLabelIndex = index;
-            clickedLabel.classList.add('selected-label');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault(); // Necessary to allow drop
-            e.currentTarget.classList.add('drag-over');
-        }
-
-        function handleDragLeave(e) {
-            e.currentTarget.classList.remove('drag-over');
-        }
-
-        // Modified handleDrop to use the dropped-on label's index
-        // This function is now called by the labelDiv's event listener,
-        // so e.currentTarget will be the labelDiv.
-        // selectedLabelIndex will be set by the drop event listener before calling processImage.
 
         function handlePaste(event) {
             const items = event.clipboardData.items;
@@ -344,50 +313,47 @@
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            processImage(e.target.result);
+                            if (selectedLabelElement) {
+                                processImage(e.target.result, selectedLabelElement);
+                            } else {
+                                alert('Please click on a label area to select it before pasting.');
+                            }
                         };
                         reader.readAsDataURL(file);
                     }
-                    return; // Only process the first image
+                    return;
                 }
             }
             alert('No image found in clipboard.');
         }
 
-        function handleDrop(e) {
-            e.currentTarget.classList.remove('drag-over'); // Remove drag-over class
-            // Set the selectedLabelIndex to the one being dropped on
-            selectedLabelIndex = parseInt(e.currentTarget.dataset.labelIndex);
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && files[0].type.startsWith('image/')) {
-                const file = files[0];
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    processImage(event.target.result);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                alert('No valid image found for drag and drop.');
+        function handleDrop(event, targetLabel) {
+            const files = event.dataTransfer.files;
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type.startsWith('image/')) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        processImage(e.target.result);
+                    }; // The targetLabel is already passed from the event listener
+                    reader.readAsDataURL(file);
+                    return;
+                }
             }
+            alert('No valid image found to drag and drop.');
         }
 
-        function processImage(dataUrl) {
-            let targetIndex = selectedLabelIndex !== -1 ? selectedLabelIndex : currentLabelIndex;
-
-            if (targetIndex >= labels.length) {
-                alert(`All ${labelsPerPage} label slots are full. Clear the page to add more.`);
-                return;
+        function processImage(dataUrl, targetLabel) {
+            if (targetLabel.querySelector('img')) {
+                if (!confirm('This label already has an image. Do you want to replace it?')) {
+                    return;
+                }
             }
 
             const img = new Image();
             img.onload = () => {
-                const targetLabel = labels[targetIndex];
                 targetLabel.innerHTML = ''; // Limpiar contenido previo
                 targetLabel.classList.remove('empty');
-                if (selectedLabelIndex !== -1) {
-                    targetLabel.classList.remove('selected-label'); // Deselect after pasting
-                    selectedLabelIndex = -1; // Reset selection
-                }
 
                 let imgWidth = img.naturalWidth;
                 let imgHeight = img.naturalHeight;
@@ -395,14 +361,22 @@
                 let rotation = 0;
                 let scale = 1;
 
-                // Calcular ajuste sin rotación
-                const scaleNoRotate = Math.min(targetLabelWidthPx / imgWidth, targetLabelHeightPx / imgHeight);
+        let currentLabelWidthPx, currentLabelHeightPx;
+        if (currentMode === 'two-up') {
+            currentLabelWidthPx = 8.5 * 96;
+            currentLabelHeightPx = 5.5 * 96;
+        } else { // 'four-up'
+            currentLabelWidthPx = 4.25 * 96;
+            currentLabelHeightPx = 5.5 * 96;
+        }
 
-                // Calcular ajuste con rotación de 90 grados
-                const scaleWithRotate = Math.min(targetLabelWidthPx / imgHeight, targetLabelHeightPx / imgWidth);
+        // Calculate fit without rotation
+        const scaleNoRotate = Math.min(currentLabelWidthPx / imgWidth, currentLabelHeightPx / imgHeight);
 
-                if (scaleWithRotate > scaleNoRotate) {
-                    // La rotación de 90 grados ofrece un mejor ajuste
+        // Calculate fit with 90-degree rotation
+        const scaleWithRotate = Math.min(currentLabelWidthPx / imgHeight, currentLabelHeightPx / imgWidth);
+
+        if (scaleWithRotate > scaleNoRotate) {
                     rotation = 90;
                     scale = scaleWithRotate;
                 } else {
@@ -410,17 +384,13 @@
                     rotation = 0;
                     scale = scaleNoRotate;
                 }
-
-                // Apply transformations
+        
+        // Apply transformations
                 img.style.transform = `rotate(${rotation}deg) scale(${scale})`;
-                img.style.maxWidth = 'none'; // Allow image to scale beyond its natural size if needed
+                img.style.maxWidth = 'none'; // Permitir que la imagen se escale más allá de su tamaño original si es necesario
                 img.style.maxHeight = 'none';
-                img.style.width = `${imgWidth * scale}px`; // Set explicit width after scaling
-                img.style.height = `${imgHeight * scale}px`; // Set explicit height after scaling
-
 
                 targetLabel.appendChild(img);
-                currentLabelIndex++;
                 updateButtons();
             };
             img.src = dataUrl;
@@ -431,20 +401,20 @@
         }
 
         function clearLabels() {
-            labels.forEach(label => {
-                label.innerHTML = '';
-                label.classList.add('empty');
-                label.classList.remove('selected-label');
-            });
-            currentLabelIndex = 0;
-            selectedLabelIndex = -1;
-            updateButtons();
+            renderLabels(currentMode); // Re-render labels to ensure correct number and selection
         }
 
         function updateButtons() {
-            printButton.disabled = currentLabelIndex === 0;
-            clearButton.disabled = currentLabelIndex === 0;
+            const hasImages = labels.some(label => label.querySelector('img'));
+            printButton.disabled = !hasImages;
+            clearButton.disabled = !hasImages;
         }
+
+        // Initialize state on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedMode = localStorage.getItem('labelPrinterMode') || 'two-up';
+            switchMode(savedMode); // This will call renderLabels and initialize everything
+        });
     </script>
 
 </body>
