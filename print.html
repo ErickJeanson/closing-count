@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impresor de Etiquetas de Envío</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .paste-area {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.1em;
+            color: #666;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        .paste-area:hover {
+            border-color: #007bff;
+        }
+        .paste-area.active {
+            border-color: #28a745;
+            background-color: #e6ffe6;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Estilos para la vista previa y la impresión */
+        .print-preview-container {
+            display: flex;
+            flex-wrap: wrap; /* Permite que las etiquetas se envuelvan en pantallas pequeñas */
+            justify-content: center;
+            gap: 20px; /* Espacio entre las etiquetas en la vista previa */
+            margin-top: 30px;
+            width: 100%;
+            max-width: 8.5in; /* Ancho de una hoja carta */
+            border: 1px solid #eee; /* Borde para visualizar el área de la hoja */
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background-color: #fff;
+        }
+
+        .label-half-page {
+            width: 8.5in; /* Ancho de la mitad de la hoja (vertical) */
+            height: 5.5in; /* Alto de la mitad de la hoja (vertical) */
+            border: 1px dashed #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Asegura que la imagen no se salga */
+            background-color: #f9f9f9;
+            position: relative; /* Para posicionar la imagen */
+        }
+
+        .label-half-page img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Asegura que la imagen se ajuste sin recortarse */
+            transform-origin: center center; /* Punto de rotación */
+            /* Las transformaciones de rotación y escala se aplicarán con JS */
+        }
+
+        .label-half-page.empty::before {
+            content: "Pega una imagen aquí";
+            color: #bbb;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        /* Estilos específicos para impresión */
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+                margin: 0;
+                display: block; /* Anula flexbox para impresión */
+            }
+            .container, button, .paste-area {
+                display: none; /* Oculta elementos no deseados en la impresión */
+            }
+            .print-preview-container {
+                width: 8.5in; /* Ancho de la hoja carta */
+                height: 11in; /* Alto de la hoja carta */
+                border: none;
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+                display: block; /* Anula flexbox para impresión */
+            }
+            .label-half-page {
+                width: 8.5in;
+                height: 5.5in;
+                border: none;
+                page-break-after: avoid; /* Evita saltos de página inesperados */
+                margin: 0;
+                padding: 0;
+            }
+            .label-half-page.empty {
+                display: none; /* No imprimir espacios vacíos */
+            }
+            .label-half-page.empty::before {
+                content: none;
+            }
+            /* Asegura que la página sea tamaño carta */
+            @page {
+                size: Letter; /* Tamaño de papel carta */
+                margin: 0.5in; /* Márgenes mínimos para la impresión */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Impresor de Etiquetas de Envío</h1>
+        <p>Pega una imagen (Ctrl+V o Cmd+V) en el área de abajo. La página se dividirá en dos mitades tamaño carta y la imagen se ajustará automáticamente.</p>
+        <div class="paste-area" id="pasteArea">
+            Haz clic aquí y pega tu imagen (Ctrl+V)
+        </div>
+        <button onclick="printLabels()" id="printButton" disabled>Imprimir Etiquetas</button>
+        <button onclick="clearLabels()" id="clearButton" style="background-color: #dc3545; margin-left: 10px;" disabled>Limpiar</button>
+    </div>
+
+    <div class="print-preview-container" id="printPreviewContainer">
+        <div class="label-half-page empty" id="label1"></div>
+        <div class="label-half-page empty" id="label2"></div>
+    </div>
+
+    <script>
+        const pasteArea = document.getElementById('pasteArea');
+        const label1 = document.getElementById('label1');
+        const label2 = document.getElementById('label2');
+        const printButton = document.getElementById('printButton');
+        const clearButton = document.getElementById('clearButton');
+
+        let currentLabelIndex = 0; // 0 para label1, 1 para label2
+        const labels = [label1, label2];
+
+        // Dimensiones de la mitad de una hoja carta en píxeles (aproximado, 96 DPI)
+        const HALF_PAGE_WIDTH_PX = 8.5 * 96; // 816px
+        const HALF_PAGE_HEIGHT_PX = 5.5 * 96; // 528px
+
+        // Evento de pegar en el documento
+        document.addEventListener('paste', handlePaste);
+        pasteArea.addEventListener('click', () => pasteArea.focus()); // Para que el área pueda recibir el paste
+
+        // Resaltar área de pegado
+        pasteArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            pasteArea.classList.add('active');
+        });
+        pasteArea.addEventListener('dragleave', () => {
+            pasteArea.classList.remove('active');
+        });
+        pasteArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            pasteArea.classList.remove('active');
+            handleDrop(e);
+        });
+
+        function handlePaste(event) {
+            const items = event.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.startsWith('image/')) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            processImage(e.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                    return; // Solo procesar la primera imagen encontrada
+                }
+            }
+            alert('No se encontró una imagen en el portapapeles.');
+        }
+
+        function handleDrop(event) {
+            const files = event.dataTransfer.files;
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type.startsWith('image/')) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        processImage(e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                    return; // Solo procesar la primera imagen encontrada
+                }
+            }
+            alert('No se encontró una imagen válida para arrastrar y soltar.');
+        }
+
+        function processImage(dataUrl) {
+            if (currentLabelIndex >= labels.length) {
+                alert('Ya hay dos etiquetas. Limpia la página para agregar más.');
+                return;
+            }
+
+            const img = new Image();
+            img.onload = () => {
+                const targetLabel = labels[currentLabelIndex];
+                targetLabel.innerHTML = ''; // Limpiar contenido previo
+                targetLabel.classList.remove('empty');
+
+                let imgWidth = img.naturalWidth;
+                let imgHeight = img.naturalHeight;
+
+                let rotation = 0;
+                let scale = 1;
+
+                // Calcular ajuste sin rotación
+                const scaleNoRotate = Math.min(HALF_PAGE_WIDTH_PX / imgWidth, HALF_PAGE_HEIGHT_PX / imgHeight);
+
+                // Calcular ajuste con rotación de 90 grados
+                const scaleWithRotate = Math.min(HALF_PAGE_WIDTH_PX / imgHeight, HALF_PAGE_HEIGHT_PX / imgWidth);
+
+                if (scaleWithRotate > scaleNoRotate) {
+                    // La rotación de 90 grados ofrece un mejor ajuste
+                    rotation = 90;
+                    scale = scaleWithRotate;
+                } else {
+                    // Sin rotación es mejor o igual
+                    rotation = 0;
+                    scale = scaleNoRotate;
+                }
+
+                // Aplicar transformaciones
+                img.style.transform = `rotate(${rotation}deg) scale()`;
+                img.style.transform = `rotate(${rotation}deg) scale(${scale})`;
+                img.style.maxWidth = 'none'; // Permitir que la imagen se escale más allá de su tamaño original si es necesario
+                img.style.maxHeight = 'none';
+
+                targetLabel.appendChild(img);
+                currentLabelIndex++;
+                updateButtons();
+            };
+            img.src = dataUrl;
+        }
+
+        function printLabels() {
+            window.print();
+        }
+
+        function clearLabels() {
+            labels.forEach(label => {
+                label.innerHTML = '';
+                label.classList.add('empty');
+            });
+            currentLabelIndex = 0;
+            updateButtons();
+        }
+
+        function updateButtons() {
+            printButton.disabled = currentLabelIndex === 0;
+            clearButton.disabled = currentLabelIndex === 0;
+        }
+
+        // Inicializar estado de botones al cargar
+        updateButtons();
+    </script>
+
+</body>
+</html>
