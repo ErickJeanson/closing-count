@@ -1,96 +1,125 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impresor de Etiquetas de Envío</title>
+    <title>Shipping Label Printer</title>
     <style>
+        :root {
+            --bg: #f4f7f6;
+            --text: #333;
+            --card-bg: #ffffff;
+            --border: #eee;
+            --dashed-border: #ddd;
+            --highlight: #007bff;
+            --button-hover: #0056b3;
+            --disabled-button: #cccccc;
+            --paste-area-border: #ccc;
+            --paste-area-active-border: #28a745;
+            --paste-area-active-bg: #e6ffe6;
+        }
+        body.dark-mode {
+            --bg: #282c34;
+            --text: #e0e0e0;
+            --card-bg: #3c4048;
+            --border: #555;
+            --dashed-border: #666;
+            --highlight: #61dafb;
+            --button-hover: #21a1f1;
+            --disabled-button: #555;
+            --paste-area-border: #777;
+            --paste-area-active-border: #4caf50;
+            --paste-area-active-bg: #4a515c;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f7f6;
+            background-color: var(--bg);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            color: #333;
+            color: var(--text);
+            transition: background-color 0.3s, color 0.3s;
+            padding: 10px; /* Reduced from 20px */
         }
         .container {
-            background-color: #ffffff;
+            background-color: var(--card-bg);
             padding: 25px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 800px;
-            margin-bottom: 20px;
+            max-width: 800px; /* Max width for the container */
+            margin-bottom: 5px; /* Reduced from 10px */
             text-align: center;
+            flex-shrink: 0; /* Prevent shrinking */
+            box-sizing: border-box;
         }
+        /* Specific paragraph style to reduce its margin */
         h1 {
-            color: #007bff;
-            margin-bottom: 20px;
+            color: var(--highlight);
+            margin-bottom: 10px; /* Reduced from 20px */
         }
-        .paste-area {
-            border: 2px dashed #ccc;
-            padding: 30px;
-            margin-top: 20px;
-            text-align: center;
-            font-size: 1.1em;
-            color: #666;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
-        }
-        .paste-area:hover {
-            border-color: #007bff;
-        }
-        .paste-area.active {
-            border-color: #28a745;
-            background-color: #e6ffe6;
+        .container p {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 0.9em;
         }
         button {
             padding: 12px 25px;
-            background-color: #007bff;
+            background-color: var(--highlight);
             color: white;
             border: none;
             border-radius: 5px;
             font-size: 1.1em;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin-top: 20px;
+            margin-top: 10px; /* Reduced from 20px */
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: var(--button-hover);
         }
         button:disabled {
-            background-color: #cccccc;
+            background-color: var(--disabled-button);
             cursor: not-allowed;
         }
 
         /* Estilos para la vista previa y la impresión */
         .print-preview-container {
-            display: flex;
-            flex-wrap: wrap; /* Permite que las etiquetas se envuelvan en pantallas pequeñas */
-            justify-content: center;
-            gap: 20px; /* Espacio entre las etiquetas en la vista previa */
-            margin-top: 30px;
+            flex-grow: 1; /* Take up remaining vertical space */
+            overflow-y: auto; /* Allow scrolling within the preview if labels overflow */
+            display: grid; /* Use grid for layout */
+            gap: 5px; /* Reduced from 10px */
+            margin-top: 5px; /* Reduced from 10px */
             width: 100%;
             max-width: 8.5in; /* Ancho de una hoja carta */
-            border: 1px solid #eee; /* Borde para visualizar el área de la hoja */
-            padding: 10px;
+            border: 1px solid var(--border);
+            padding: 2px; /* Reduced from 5px */
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            background-color: #fff;
+            background-color: var(--card-bg);
+            box-sizing: border-box;
+            grid-template-columns: 1fr; /* Default to 1 column for 2-up preview */
+            grid-auto-rows: min-content; /* Allow rows to size based on content */
+            justify-content: center;
+        }
+        .print-preview-container.labels-4-up {
+            grid-template-columns: 1fr 1fr; /* 2 columns for 4-up preview */
         }
 
         .label-half-page {
-            width: 8.5in; /* Ancho de la mitad de la hoja (vertical) */
-            height: 5.5in; /* Alto de la mitad de la hoja (vertical) */
-            border: 1px dashed #ddd;
+            border: 1px dashed var(--dashed-border);
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden; /* Asegura que la imagen no se salga */
-            background-color: #f9f9f9;
+            background-color: var(--bg); /* Use body bg for label background */
             position: relative; /* Para posicionar la imagen */
+            aspect-ratio: 8.5 / 5.5; /* Default aspect ratio for 2-up (Letter half) */
+            box-sizing: border-box;
+        }
+        .print-preview-container.labels-4-up .label-half-page {
+            aspect-ratio: 4.25 / 5.5; /* Aspect ratio for 4-up (Letter quarter, portrait) */
         }
 
         .label-half-page img {
@@ -98,25 +127,34 @@
             max-height: 100%;
             object-fit: contain; /* Asegura que la imagen se ajuste sin recortarse */
             transform-origin: center center; /* Punto de rotación */
-            /* Las transformaciones de rotación y escala se aplicarán con JS */
+        }
+        /* Visual feedback for drag over */
+        .label-half-page.drag-over {
+            border: 2px dashed var(--paste-area-active-border);
+            background-color: var(--paste-area-active-bg);
         }
 
-        .label-half-page.empty::before {
-            content: "Pega una imagen aquí";
+        .label-half-page.empty::before, .label-half-page.selected-label::before {
+            content: "Paste image here";
             color: #bbb;
             font-style: italic;
             font-size: 0.9em;
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+        .label-half-page.selected-label {
+            border: 2px solid var(--highlight);
+            box-shadow: 0 0 5px var(--highlight);
         }
 
         /* Estilos específicos para impresión */
         @media print {
             body {
-                background-color: #fff;
+                background-color: #fff; /* Force white background for print */
                 padding: 0;
                 margin: 0;
                 display: block; /* Anula flexbox para impresión */
             }
-            .container, button, .paste-area {
+            .container, button, .paste-area, .top-controls {
                 display: none; /* Oculta elementos no deseados en la impresión */
             }
             .print-preview-container {
@@ -126,15 +164,19 @@
                 box-shadow: none;
                 padding: 0;
                 margin: 0;
-                display: block; /* Anula flexbox para impresión */
+                display: grid; /* Use grid for print layout */
+                gap: 0;
+                grid-template-columns: 1fr 1fr; /* Always 2 columns for print */
+                grid-template-rows: 1fr 1fr; /* Always 2 rows for print */
             }
             .label-half-page {
-                width: 8.5in;
-                height: 5.5in;
+                width: 100%; /* Fill grid cell */
+                height: 100%; /* Fill grid cell */
                 border: none;
                 page-break-after: avoid; /* Evita saltos de página inesperados */
                 margin: 0;
                 padding: 0;
+                aspect-ratio: unset; /* Let grid define dimensions */
             }
             .label-half-page.empty {
                 display: none; /* No imprimir espacios vacíos */
@@ -152,52 +194,147 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1>Impresor de Etiquetas de Envío</h1>
-        <p>Pega una imagen (Ctrl+V o Cmd+V) en el área de abajo. La página se dividirá en dos mitades tamaño carta y la imagen se ajustará automáticamente.</p>
-        <div class="paste-area" id="pasteArea">
-            Haz clic aquí y pega tu imagen (Ctrl+V)
+    <div class="top-controls">
+        <div class="theme-switch">
+            <span>Dark Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="mode-toggle" onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
         </div>
-        <button onclick="printLabels()" id="printButton" disabled>Imprimir Etiquetas</button>
-        <button onclick="clearLabels()" id="clearButton" style="background-color: #dc3545; margin-left: 10px;" disabled>Limpiar</button>
+    </div>
+
+    <div class="container">
+        <h1>Shipping Label Printer</h1>
+        <p>Paste an image (Ctrl+V or Cmd+V) or drag and drop directly into a label slot below. The page will be divided into sections (Letter size) and images will automatically adjust.</p>
+        <div style="margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 15px;">
+            <label for="labelsPerPage" style="font-weight: bold;">Labels per page:</label>
+            <select id="labelsPerPage" onchange="setLabelsPerPage(this.value)">
+                <option value="2">2</option>
+                <option value="4">4</option>
+            </select>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="printLabels()" id="printButton" disabled>Print Labels</button>
+            <button onclick="clearLabels()" id="clearButton" style="background-color: #dc3545; margin-left: 10px;" disabled>Clear</button>
+        </div>
     </div>
 
     <div class="print-preview-container" id="printPreviewContainer">
-        <div class="label-half-page empty" id="label1"></div>
-        <div class="label-half-page empty" id="label2"></div>
+        <!-- Labels will be dynamically generated here -->
     </div>
 
     <script>
-        const pasteArea = document.getElementById('pasteArea');
-        const label1 = document.getElementById('label1');
-        const label2 = document.getElementById('label2');
         const printButton = document.getElementById('printButton');
         const clearButton = document.getElementById('clearButton');
+        const labelsPerPageSelect = document.getElementById('labelsPerPage');
+        const printPreviewContainer = document.getElementById('printPreviewContainer');
 
-        let currentLabelIndex = 0; // 0 para label1, 1 para label2
-        const labels = [label1, label2];
+        let labels = []; // Array to hold references to label divs
+        let currentLabelIndex = 0; // Index for next available label
+        let selectedLabelIndex = -1; // -1 if no label is selected
+        let labelsPerPage = parseInt(labelsPerPageSelect.value); // Default from select
 
-        // Dimensiones de la mitad de una hoja carta en píxeles (aproximado, 96 DPI)
-        const HALF_PAGE_WIDTH_PX = 8.5 * 96; // 816px
-        const HALF_PAGE_HEIGHT_PX = 5.5 * 96; // 528px
+        const LETTER_WIDTH_IN = 8.5;
+        const LETTER_HEIGHT_IN = 11;
+        const DPI = 96; // Standard browser DPI
+
+        let targetLabelWidthPx;
+        let targetLabelHeightPx;
+
+        // Initialize theme on load
+        initTheme();
+        // Setup labels based on initial selection
+        setupLabels();
 
         // Evento de pegar en el documento
         document.addEventListener('paste', handlePaste);
-        pasteArea.addEventListener('click', () => pasteArea.focus()); // Para que el área pueda recibir el paste
 
-        // Resaltar área de pegado
-        pasteArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            pasteArea.classList.add('active');
-        });
-        pasteArea.addEventListener('dragleave', () => {
-            pasteArea.classList.remove('active');
-        });
-        pasteArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            pasteArea.classList.remove('active');
-            handleDrop(e);
-        });
+        function initTheme() {
+            const toggle = document.getElementById('mode-toggle');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('shippingLabelApp_theme');
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.body.classList.add('dark-mode');
+                toggle.checked = true;
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('shippingLabelApp_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        function updateTargetLabelDimensions() {
+            if (labelsPerPage === 2) {
+                targetLabelWidthPx = LETTER_WIDTH_IN * DPI;
+                targetLabelHeightPx = (LETTER_HEIGHT_IN / 2) * DPI;
+            } else { // labelsPerPage === 4
+                targetLabelWidthPx = (LETTER_WIDTH_IN / 2) * DPI;
+                targetLabelHeightPx = (LETTER_HEIGHT_IN / 2) * DPI;
+            }
+        }
+
+        function setupLabels() {
+            printPreviewContainer.innerHTML = ''; // Clear existing labels
+            labels = []; // Clear labels array
+            currentLabelIndex = 0;
+            selectedLabelIndex = -1;
+
+            if (labelsPerPage === 4) {
+                printPreviewContainer.classList.add('labels-4-up');
+            } else {
+                printPreviewContainer.classList.remove('labels-4-up');
+            }
+
+            for (let i = 0; i < labelsPerPage; i++) {
+                const labelDiv = document.createElement('div');
+                labelDiv.classList.add('label-half-page', 'empty');
+                labelDiv.dataset.labelIndex = i;
+                labelDiv.addEventListener('click', selectLabel);
+                printPreviewContainer.appendChild(labelDiv);
+                labels.push(labelDiv);
+                // Add drag and drop listeners to each label slot
+                labelDiv.addEventListener('dragover', handleDragOver);
+                labelDiv.addEventListener('dragleave', handleDragLeave);
+                labelDiv.addEventListener('drop', handleDrop);
+            }
+            updateTargetLabelDimensions();
+            updateButtons();
+        }
+
+        function setLabelsPerPage(count) {
+            labelsPerPage = parseInt(count);
+            setupLabels(); // Re-render labels
+        }
+
+        function selectLabel(event) {
+            // Deselect previous
+            if (selectedLabelIndex !== -1 && labels[selectedLabelIndex]) {
+                labels[selectedLabelIndex].classList.remove('selected-label');
+            }
+
+            const clickedLabel = event.currentTarget;
+            const index = parseInt(clickedLabel.dataset.labelIndex);
+
+            selectedLabelIndex = index;
+            clickedLabel.classList.add('selected-label');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault(); // Necessary to allow drop
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        // Modified handleDrop to use the dropped-on label's index
+        // This function is now called by the labelDiv's event listener,
+        // so e.currentTarget will be the labelDiv.
+        // selectedLabelIndex will be set by the drop event listener before calling processImage.
 
         function handlePaste(event) {
             const items = event.clipboardData.items;
@@ -211,39 +348,46 @@
                         };
                         reader.readAsDataURL(file);
                     }
-                    return; // Solo procesar la primera imagen encontrada
+                    return; // Only process the first image
                 }
             }
-            alert('No se encontró una imagen en el portapapeles.');
+            alert('No image found in clipboard.');
         }
 
-        function handleDrop(event) {
-            const files = event.dataTransfer.files;
-            for (let i = 0; i < files.length; i++) {
-                if (files[i].type.startsWith('image/')) {
-                    const file = files[i];
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        processImage(e.target.result);
-                    };
-                    reader.readAsDataURL(file);
-                    return; // Solo procesar la primera imagen encontrada
-                }
+        function handleDrop(e) {
+            e.currentTarget.classList.remove('drag-over'); // Remove drag-over class
+            // Set the selectedLabelIndex to the one being dropped on
+            selectedLabelIndex = parseInt(e.currentTarget.dataset.labelIndex);
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    processImage(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('No valid image found for drag and drop.');
             }
-            alert('No se encontró una imagen válida para arrastrar y soltar.');
         }
 
         function processImage(dataUrl) {
-            if (currentLabelIndex >= labels.length) {
-                alert('Ya hay dos etiquetas. Limpia la página para agregar más.');
+            let targetIndex = selectedLabelIndex !== -1 ? selectedLabelIndex : currentLabelIndex;
+
+            if (targetIndex >= labels.length) {
+                alert(`All ${labelsPerPage} label slots are full. Clear the page to add more.`);
                 return;
             }
 
             const img = new Image();
             img.onload = () => {
-                const targetLabel = labels[currentLabelIndex];
+                const targetLabel = labels[targetIndex];
                 targetLabel.innerHTML = ''; // Limpiar contenido previo
                 targetLabel.classList.remove('empty');
+                if (selectedLabelIndex !== -1) {
+                    targetLabel.classList.remove('selected-label'); // Deselect after pasting
+                    selectedLabelIndex = -1; // Reset selection
+                }
 
                 let imgWidth = img.naturalWidth;
                 let imgHeight = img.naturalHeight;
@@ -252,10 +396,10 @@
                 let scale = 1;
 
                 // Calcular ajuste sin rotación
-                const scaleNoRotate = Math.min(HALF_PAGE_WIDTH_PX / imgWidth, HALF_PAGE_HEIGHT_PX / imgHeight);
+                const scaleNoRotate = Math.min(targetLabelWidthPx / imgWidth, targetLabelHeightPx / imgHeight);
 
                 // Calcular ajuste con rotación de 90 grados
-                const scaleWithRotate = Math.min(HALF_PAGE_WIDTH_PX / imgHeight, HALF_PAGE_HEIGHT_PX / imgWidth);
+                const scaleWithRotate = Math.min(targetLabelWidthPx / imgHeight, targetLabelHeightPx / imgWidth);
 
                 if (scaleWithRotate > scaleNoRotate) {
                     // La rotación de 90 grados ofrece un mejor ajuste
@@ -267,11 +411,13 @@
                     scale = scaleNoRotate;
                 }
 
-                // Aplicar transformaciones
-                img.style.transform = `rotate(${rotation}deg) scale()`;
+                // Apply transformations
                 img.style.transform = `rotate(${rotation}deg) scale(${scale})`;
-                img.style.maxWidth = 'none'; // Permitir que la imagen se escale más allá de su tamaño original si es necesario
+                img.style.maxWidth = 'none'; // Allow image to scale beyond its natural size if needed
                 img.style.maxHeight = 'none';
+                img.style.width = `${imgWidth * scale}px`; // Set explicit width after scaling
+                img.style.height = `${imgHeight * scale}px`; // Set explicit height after scaling
+
 
                 targetLabel.appendChild(img);
                 currentLabelIndex++;
@@ -288,8 +434,10 @@
             labels.forEach(label => {
                 label.innerHTML = '';
                 label.classList.add('empty');
+                label.classList.remove('selected-label');
             });
             currentLabelIndex = 0;
+            selectedLabelIndex = -1;
             updateButtons();
         }
 
@@ -297,9 +445,6 @@
             printButton.disabled = currentLabelIndex === 0;
             clearButton.disabled = currentLabelIndex === 0;
         }
-
-        // Inicializar estado de botones al cargar
-        updateButtons();
     </script>
 
 </body>
