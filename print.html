@@ -134,6 +134,8 @@
             overflow: hidden; /* Asegura que la imagen no se salga */
             background-color: #f9f9f9;
             position: relative; /* Para posicionar la imagen */
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            padding: 0.15in; /* Aumenta el padding dentro del marco de la etiqueta */
         }
 
         .label-half-page img {
@@ -170,21 +172,22 @@
                 display: block;
                 gap: 0;
                 padding: 0;
-                margin: 0;
                 box-shadow: none;
                 background-color: #fff;
-                box-shadow: none;
-                padding: 0;
-                margin: 0;
                 display: block; /* Anula flexbox para impresión */
+                margin: 0; /* Asegura que no haya margen externo en el contenedor */
+                /* Ajusta el print-preview-container para que quepa dentro de los márgenes de la página */
+                width: 7.5in; /* 8.5in - 2*0.5in de margen de página */
+                height: 10in; /* 11in - 2*0.5in de margen de página */
             }
             .label-half-page {
-                width: 8.5in;
-                height: 5.5in;
+                width: 7.5in; /* 8.5in - 2*0.5in de margen de página */
+                height: 5in; /* (11in - 2*0.5in de margen de página) / 2 */
                 border: none; /* No border for print */
                 page-break-after: avoid; /* Evita saltos de página inesperados */
                 margin: 0;
                 padding: 0;
+                padding: 0.15in; /* Aplica el padding aumentado también para impresión */
             }
             .label-half-page.empty { /* Do not print empty placeholders */
                 display: none; /* No imprimir espacios vacíos */
@@ -196,13 +199,15 @@
             .print-preview-container.four-up-mode {
                 display: grid; /* Override display: block */
                 grid-template-columns: repeat(2, 1fr);
-                gap: 0;
-                padding: 0;
+                gap: 0.25in; /* Aumenta el espacio entre las etiquetas para impresión */
+                padding: 0; /* Asegura que el contenedor no tenga padding propio en impresión */
             }
             .print-preview-container.four-up-mode .label-half-page {
-                width: 4.25in; /* Override width for 4-up */
-                height: 5.5in; /* Same height as 2-up, but half width */
+                /* Calcula el ancho y alto para tener en cuenta el gap y ajustarse al área imprimible de 7.5in x 10in */
+                width: calc((7.5in - 0.25in) / 2); /* (ancho_imprimible - gap) / 2 */
+                height: calc((10in - 0.25in) / 2); /* (alto_imprimible - gap) / 2 */
                 border: none;
+                box-sizing: border-box; /* Ensure box-sizing is applied in print */
             }
             /* Asegura que la página sea tamaño carta */
             @page {
